@@ -69,7 +69,12 @@ export default function ConfirmPage() {
       </ul>
       {p.free_text.trim() && (
         <div className="mt-6">
-          <div className="text-xs uppercase tracking-wide text-stone-500">In your words</div>
+          <div className="flex items-center justify-between">
+            <div className="text-xs uppercase tracking-wide text-stone-500">In your words</div>
+            <Link href="/intake?q=free_text&return=confirm" className="rounded-lg px-3 py-2 text-sm font-medium text-teal-800 hover:bg-teal-50">
+              Edit
+            </Link>
+          </div>
           <p className="mt-1 whitespace-pre-wrap rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700">{p.free_text}</p>
         </div>
       )}

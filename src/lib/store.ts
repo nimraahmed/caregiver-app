@@ -79,6 +79,8 @@ export function useAppState() {
       update((s) => ({
         ...s,
         profile: { ...s.profile, ...patch },
+        strokeFlagAcknowledged:
+          "new_stroke_signs" in patch && patch.new_stroke_signs !== s.profile.new_stroke_signs ? false : s.strokeFlagAcknowledged,
         answered: questionId && !s.answered.includes(questionId) ? [...s.answered, questionId] : s.answered,
       })),
     [update],

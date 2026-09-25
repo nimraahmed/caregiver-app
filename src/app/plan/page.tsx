@@ -29,7 +29,7 @@ function groupBy<K extends string>(items: SelectedCard[], key: (c: SelectedCard)
 }
 
 export default function PlanPage() {
-  const { state, hydrated, update } = useAppState();
+  const { state, hydrated, update, setProfile } = useAppState();
   const [tab, setTab] = useState<"home" | "routine">("home");
   const p = state.profile;
 
@@ -69,9 +69,13 @@ export default function PlanPage() {
         >
           {STROKE_FLAG.ack} — show the plan
         </button>
-        <Link href="/intake?q=red_flags&return=confirm" className="mt-4 text-center text-sm text-red-100 underline">
+        <button
+          type="button"
+          onClick={() => setProfile({ new_stroke_signs: false })}
+          className="mt-4 min-h-12 text-center text-sm text-red-100 underline"
+        >
           I ticked this by mistake
-        </Link>
+        </button>
       </div>
     );
   }
