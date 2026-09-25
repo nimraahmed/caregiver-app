@@ -104,7 +104,7 @@ export default function PlanPage() {
         </h1>
         <p className="mt-2 text-sm text-stone-600">
           Based on your answers. Every item shows its source.{" "}
-          <Link href="/confirm" className="text-teal-800 underline print:hidden">Edit answers</Link>
+          <Link href="/confirm" className="inline-flex min-h-12 items-center px-1 text-teal-800 underline print:hidden">Edit answers</Link>
         </p>
       </header>
 
@@ -123,7 +123,7 @@ export default function PlanPage() {
             role="tab"
             aria-selected={tab === t}
             onClick={() => setTab(t)}
-            className={`min-h-11 rounded-lg text-sm font-medium ${tab === t ? "bg-white text-stone-900 shadow-sm" : "text-stone-600"}`}
+            className={`min-h-12 rounded-lg text-sm font-medium ${tab === t ? "bg-white text-stone-900 shadow-sm" : "text-stone-600"}`}
           >
             {t === "home" ? `Home changes (${homeChanges.length})` : `Daily routine (${routine.length})`}
           </button>

@@ -49,7 +49,7 @@ export function PlanCard({ card, caregiver }: { card: SelectedCard; caregiver: C
         <button
           type="button"
           onClick={() => setShowSource((s) => !s)}
-          className="flex min-h-10 items-center gap-1.5 text-sm text-stone-600 hover:text-stone-900 print:hidden"
+          className="flex min-h-12 w-full items-center gap-1.5 text-sm text-stone-600 hover:text-stone-900 print:hidden"
           aria-expanded={showSource}
         >
           <BookOpen size={16} /> Source
@@ -64,7 +64,7 @@ export function PlanCard({ card, caregiver }: { card: SelectedCard; caregiver: C
             <Badge>{TIER_LABEL[card.source_tier]}</Badge>
             {card.source_status === "needs_source" && <Badge tone="amber">Source pending review</Badge>}
             {card.source.url && (
-              <a href={card.source.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-teal-800 underline print:no-underline">
+              <a href={card.source.url} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center gap-1 px-1 text-teal-800 underline print:no-underline">
                 Open source <ExternalLink size={14} />
               </a>
             )}

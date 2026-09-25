@@ -92,7 +92,7 @@ export function QuestionBody({ id, profile: p, evidence, onChange }: Props) {
                 type="button"
                 onClick={() => onChange({ free_text: ((p.free_text ? p.free_text.trimEnd() + " " : "") + ex).slice(0, 500) })}
                 disabled={p.free_text.length + ex.length + 1 > 500}
-                className="rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-700 hover:border-teal-700 disabled:opacity-40"
+                className="min-h-12 rounded-full border border-stone-300 bg-white px-4 py-2 text-left text-sm text-stone-700 hover:border-teal-700 disabled:opacity-40"
               >
                 + {ex}
               </button>

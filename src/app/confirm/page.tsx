@@ -61,7 +61,7 @@ export default function ConfirmPage() {
               <div className="text-base">{r.value}</div>
               {state.evidence[r.q] && <div className="mt-0.5 text-xs text-teal-800">From your description: &ldquo;{state.evidence[r.q]}&rdquo;</div>}
             </div>
-            <Link href={`/intake?q=${r.q}&return=confirm`} className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-teal-800 hover:bg-teal-50">
+            <Link href={`/intake?q=${r.q}&return=confirm`} className="inline-flex min-h-12 shrink-0 items-center rounded-lg px-3 text-sm font-medium text-teal-800 hover:bg-teal-50">
               Edit
             </Link>
           </li>
@@ -71,7 +71,7 @@ export default function ConfirmPage() {
         <div className="mt-6">
           <div className="flex items-center justify-between">
             <div className="text-xs uppercase tracking-wide text-stone-500">In your words</div>
-            <Link href="/intake?q=free_text&return=confirm" className="rounded-lg px-3 py-2 text-sm font-medium text-teal-800 hover:bg-teal-50">
+            <Link href="/intake?q=free_text&return=confirm" className="inline-flex min-h-12 items-center rounded-lg px-3 text-sm font-medium text-teal-800 hover:bg-teal-50">
               Edit
             </Link>
           </div>
