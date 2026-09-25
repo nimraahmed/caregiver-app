@@ -2,6 +2,8 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 import type { Profile } from "./types";
+import type { TailoredPlan } from "./validate";
+import { type CheckIn, EMPTY_CHECKIN } from "./checkin";
 
 export const EMPTY_PROFILE: Profile = {
   conditions: [],
@@ -17,6 +19,10 @@ export const EMPTY_PROFILE: Profile = {
   bathroom_type: "shower",
   caregiver: "family",
   alone_hours_per_day: "0",
+  night_toilet: false,
+  barefoot_indoors: false,
+  cooks_alone: false,
+  phone_out_of_reach: false,
   open_foot_wound: false,
   new_stroke_signs: false,
   free_text: "",
@@ -25,15 +31,37 @@ export const EMPTY_PROFILE: Profile = {
 
 export interface AppState {
   profile: Profile;
+  /** First name of the person being cared for; UI labels only, never sent to the model. */
+  patientName: string;
   /** Questions the user has explicitly answered (by question id). */
   answered: string[];
   strokeFlagAcknowledged: boolean;
-  /** LLM evidence quotes for pre-filled fields (Milestone 3). */
+  /** LLM evidence quotes for pre-filled fields, keyed by profile field. */
   evidence: Record<string, string>;
+  /** The free text that was last sent to /api/parse, so we do not re-parse unchanged text. */
+  parsedText: string;
+  /** Cached /api/plan result for the profile hash it was computed for. */
+  plan: { key: string; plan: TailoredPlan; fallback: boolean } | null;
+  /** Card ids the user chose to reveal after a hide suggestion. */
+  revealed: string[];
+  /** ISO timestamp of the first time a plan was shown; anchors the 30-day check-in. */
+  planCreatedAt: string | null;
+  checkin: CheckIn;
 }
 
 const KEY = "hac-state-v1";
-const INITIAL: AppState = { profile: EMPTY_PROFILE, answered: [], strokeFlagAcknowledged: false, evidence: {} };
+const INITIAL: AppState = {
+  profile: EMPTY_PROFILE,
+  patientName: "",
+  answered: [],
+  strokeFlagAcknowledged: false,
+  evidence: {},
+  parsedText: "",
+  plan: null,
+  revealed: [],
+  planCreatedAt: null,
+  checkin: EMPTY_CHECKIN,
+};
 
 let cache: AppState | null = null;
 const listeners = new Set<() => void>();
@@ -43,7 +71,7 @@ function read(): AppState {
   try {
     const raw = window.sessionStorage.getItem(KEY);
     const parsed = raw ? (JSON.parse(raw) as Partial<AppState>) : {};
-    cache = { ...INITIAL, ...parsed, profile: { ...EMPTY_PROFILE, ...(parsed.profile ?? {}) } };
+    cache = { ...INITIAL, ...parsed, profile: { ...EMPTY_PROFILE, ...(parsed.profile ?? {}) }, checkin: { ...EMPTY_CHECKIN, ...(parsed.checkin ?? {}) } };
   } catch {
     cache = INITIAL;
   }
@@ -79,6 +107,8 @@ export function useAppState() {
       update((s) => ({
         ...s,
         profile: { ...s.profile, ...patch },
+        // An explicit answer replaces the parsed one, so its quote no longer applies.
+        evidence: Object.fromEntries(Object.entries(s.evidence).filter(([field]) => !(field in patch) || patch[field as keyof Profile] === s.profile[field as keyof Profile])),
         strokeFlagAcknowledged:
           "new_stroke_signs" in patch && patch.new_stroke_signs !== s.profile.new_stroke_signs ? false : s.strokeFlagAcknowledged,
         answered: questionId && !s.answered.includes(questionId) ? [...s.answered, questionId] : s.answered,

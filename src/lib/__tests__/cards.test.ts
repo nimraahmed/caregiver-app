@@ -5,9 +5,10 @@ import { validateCards } from "../schema";
 describe("T11 cards.json", () => {
   it("passes schema and referential checks", () => {
     const cards = validateCards(raw);
-    expect(cards).toHaveLength(19);
+    expect(cards).toHaveLength(28);
     expect(cards.every((c) => c.source.title && c.source_tier)).toBe(true);
-    expect(cards.filter((c) => c.source_status === "needs_source").map((c) => c.id).sort()).toEqual(["ST-BATH-03", "X-FOOT-01", "X-LIV-01"]);
+    expect(cards.filter((c) => c.source_status === "needs_source")).toEqual([]);
+    expect(cards.every((c) => c.source.url && c.source.quote)).toBe(true);
   });
 
   it("rejects duplicate ids, unknown supersedes, chains and prefix mismatch", () => {
