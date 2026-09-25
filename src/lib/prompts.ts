@@ -36,8 +36,9 @@ bathroom or living area they use is on another floor ("bedroom upstairs"), set "
 and quote that phrase; a villa alone does not imply stairs. "night_toilet" is true if they get up at
 night for the toilet; "barefoot_indoors" if they walk around barefoot or in socks; "cooks_alone" if
 they make their own drinks or meals; "phone_out_of_reach" if they cannot reach a phone or alarm. If the text mentions
-an open wound, sore or blister on the foot, or sudden new face drooping, arm weakness or slurred speech,
-set the matching red-flag field to true. For every non-null field give a short quote from the text as evidence.
+an open wound, sore or blister on the foot, or sudden new face drooping, arm weakness or slurred speech
+happening now, set the matching red-flag field to true. A past stroke, or ongoing weakness left by it,
+is NOT a red flag: "new_stroke_signs" is only true for symptoms described as new, sudden or today. For every non-null field give a short quote from the text as evidence.
 
 PART B — household context. Extract short factual phrases (max 12 words each) about: layout of the
 home, daily routine, who is around and when, and preferences or refusals. Only facts stated in the
