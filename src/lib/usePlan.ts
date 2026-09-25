@@ -26,10 +26,11 @@ export function usePlan(enabled: boolean): { plan: TailoredPlan; loading: boolea
   // Fallbacks are remembered only for this mount so a recovered model is retried on the next visit.
   const [failed, setFailed] = useState<string | null>(null);
   const cached = stored ?? (failed === key ? { key, plan: base, fallback: true } : null);
+  const settled = cached !== null;
   const inflight = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!enabled || cached || p.conditions.length === 0 || inflight.current === key) return;
+    if (!enabled || settled || p.conditions.length === 0 || inflight.current === key) return;
     inflight.current = key;
     const ctrl = new AbortController();
     (async () => {
@@ -52,7 +53,7 @@ export function usePlan(enabled: boolean): { plan: TailoredPlan; loading: boolea
       ctrl.abort();
       if (inflight.current === key) inflight.current = null;
     };
-  }, [enabled, key, cached, p, update]);
+  }, [enabled, key, settled, p, update]);
 
   return {
     plan: cached?.plan ?? base,

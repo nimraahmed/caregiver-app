@@ -22,6 +22,14 @@ export function violatesGeneratedText(text: string): boolean {
   return GENERATED_TEXT_RE.test(text);
 }
 
+/** Wording that accepts, excuses or works around not doing a plan card. */
+export const CONTRADICTION_RE =
+  /\b(continue|carry on|keep on|no need|not (needed|necessary)|don'?t (need|have) to|skip|optional|only (if|when)|instead of|instead|work(ing)? around|as safe as possible|without (a|the) (seat|chair|rail|rails|aid|stick|frame)|since (he|she|they) (refuses?|won'?t|declines?)|if (he|she|they) (refuses?|prefers?|declines?|insists?)|(?<!no )standing showers?)\b/i;
+
+export function acceptsRefusal(text: string): boolean {
+  return CONTRADICTION_RE.test(text);
+}
+
 /** Context chips must be non-medical facts about the home and routine. */
 export function isMedicalContext(text: string): boolean {
   return CONTEXT_MEDICAL_RE.test(text);

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isMedicalContext, violatesGeneratedText } from "./guard";
+import { acceptsRefusal, isMedicalContext, violatesGeneratedText } from "./guard";
 import { householdContextSchema, profileSchema } from "./schema";
 import { URGENCY_ORDER, type HouseholdContext, type Profile, type SelectedCard, type Urgency } from "./types";
 
@@ -151,12 +151,9 @@ function safeText(value: string | null | undefined, max: number): string | null 
   return t;
 }
 
-/** Wording that accepts or excuses not doing the card. */
-const CONTRADICTION_RE = /\b(continue|carry on|keep on|no need|not (needed|necessary)|don'?t (need|have) to|skip|optional|only (if|when)|instead of|if (he|she|they) (refuses?|prefers?|declines?|insists?))\b/i;
-
 function safeStep(value: string, max: number): string | null {
   const t = safeText(value, max);
-  return t && !CONTRADICTION_RE.test(t) ? t : null;
+  return t && !acceptsRefusal(t) ? t : null;
 }
 
 /** Plain rules output wrapped as a plan, used when the LLM is unavailable. */

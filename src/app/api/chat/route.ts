@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { CARDS } from "@/lib/cards";
-import { isMedicalQuestion, REFUSAL_TEXT, violatesGeneratedText } from "@/lib/guard";
+import { acceptsRefusal, isMedicalQuestion, REFUSAL_TEXT, violatesGeneratedText } from "@/lib/guard";
 import { completeText, llmConfig, type ChatMessage } from "@/lib/llm";
 import { CHAT_SYSTEM } from "@/lib/prompts";
 import { allowRequest, rateLimited } from "@/lib/ratelimit";
@@ -12,6 +12,8 @@ export const maxDuration = 30;
 const MAX_USER_TURNS = 6;
 const UNAVAILABLE = "The assistant is unavailable right now. The plan above still applies.";
 const UNGROUNDED = "I can only help with the home changes in your plan. Please ask their doctor or nurse about anything medical.";
+const NOT_NEGOTIABLE =
+  "The plan items stand as written — they are there to prevent a fall or injury, so I can't suggest a way around one. Try introducing it once with someone present, and ask their nurse or occupational therapist for help if it is still refused.";
 
 function text(body: string, status = 200) {
   return new Response(body, { status, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
@@ -59,10 +61,13 @@ export async function POST(req: Request) {
   ];
 
   try {
-    const answer = (await completeText(cfg, llmMessages, { temperature: 0.5, maxTokens: 220, signal: req.signal })).trim();
+    let answer = (await completeText(cfg, llmMessages, { temperature: 0.5, maxTokens: 400, signal: req.signal })).trim();
     if (!answer) return text(UNAVAILABLE, 503);
+    // Models sometimes bolt the refusal onto an otherwise grounded answer; the guard already decided this was non-medical.
+    if (answer !== REFUSAL_TEXT && answer.includes(REFUSAL_TEXT)) answer = answer.replace(REFUSAL_TEXT, "").trim();
     // The whole reply is checked before any of it is shown.
     if (violatesGeneratedText(answer)) return text(UNGROUNDED);
+    if (acceptsRefusal(answer)) return text(NOT_NEGOTIABLE);
     return text(answer);
   } catch {
     return text(UNAVAILABLE, 503);
