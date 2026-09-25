@@ -255,11 +255,97 @@
     "cost": "low",
     "fall_risk": true,
     "source": {
-      "title": "Occupational therapy convention — pending clinician review",
-      "section": "No UK/UAE guideline statement found"
+      "title": "Scottish Government — Enhancing the accessibility, adaptability and usability of Scotland's homes (housing design guidance)",
+      "section": "Bathrooms",
+      "url": "https://www.gov.scot/publications/enhancing-accessibility-adaptability-usability-scotlands-homes-consultation/pages/15/",
+      "quote": "Locks on bathroom doors should be capable of being released from the outside in case of emergency."
     },
-    "source_tier": "product_logic",
-    "source_status": "needs_source"
+    "source_tier": "health_service",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-BATH-04",
+    "conditions": ["stroke"],
+    "triggers": [{ "field": "bathroom_type", "op": "in", "value": ["bathtub", "both"] }],
+    "room": "bathroom",
+    "kind": "home_change",
+    "action": "Fit a bath seat or bath board and a grab rail at the bath; nobody steps over the side without a hand to hold",
+    "why": "Stepping over a bath edge on one leg is where balance fails after stroke; sitting to get in and out removes that moment.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "medium",
+    "fall_risk": true,
+    "source": {
+      "title": "Stroke Association — Equipment for stroke survivors at home",
+      "section": "Bathroom aids",
+      "url": "https://www.stroke.org.uk/stroke/life-after/equipment-independent-living",
+      "quote": "Grab rails to help you get in and out of the shower or bath … Bath and shower seats so you can sit down while bathing"
+    },
+    "source_tier": "patient_org",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-MOVE-01",
+    "conditions": ["stroke"],
+    "triggers": [{ "field": "walks", "op": "in", "value": ["with_help", "not_walking"] }],
+    "room": "whole_home",
+    "kind": "home_change",
+    "action": "Ask the stroke team for a transfer-equipment assessment (hoist, chair raiser, transfer aids) and training for whoever helps them move",
+    "why": "Bed-to-chair and chair-to-toilet moves are when both of you can fall; the right equipment and a taught technique protect you both.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "free",
+    "fall_risk": true,
+    "source": {
+      "title": "NICE NG236 — Stroke rehabilitation in adults",
+      "section": "1.16.3 Activities of daily living",
+      "url": "https://www.nice.org.uk/guidance/ng236/chapter/Recommendations",
+      "quote": "Assess people after stroke for their equipment needs and to see whether their family or carers need training to use the equipment … Equipment may include hoists, chair raisers and small aids"
+    },
+    "source_tier": "guideline",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-MEM-01",
+    "conditions": ["stroke"],
+    "triggers": [{ "field": "memory_or_attention_issues", "op": "eq", "value": true }],
+    "room": "living",
+    "kind": "home_change",
+    "action": "Put a written daily checklist where they sit and set phone alarms for the routine items",
+    "why": "After stroke, memory and attention work better with prompts in the room than with reminders from people.",
+    "owner": "caregiver",
+    "urgency": "this_month",
+    "cost": "free",
+    "fall_risk": false,
+    "source": {
+      "title": "NICE NG236 — Stroke rehabilitation in adults",
+      "section": "1.5.6 Memory function",
+      "url": "https://www.nice.org.uk/guidance/ng236/chapter/Recommendations",
+      "quote": "external aids (for example, diaries, lists, calendars and alarms) … environmental strategies (using routines and environmental prompts)"
+    },
+    "source_tier": "guideline",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-MEAL-01",
+    "conditions": ["stroke"],
+    "triggers": [{ "field": "swallowing_issues", "op": "eq", "value": true }],
+    "room": "routine",
+    "kind": "daily_routine",
+    "action": "Meals and drinks only sitting upright at the table with the TV off — never lying down or when drowsy",
+    "why": "Food or drink going the wrong way can cause pneumonia; posture and attention are the parts of swallowing safety the household controls.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "free",
+    "fall_risk": false,
+    "source": {
+      "title": "Stroke Association — Swallowing problems",
+      "section": "Learn how to swallow safely (dos and don'ts)",
+      "url": "https://www.stroke.org.uk/stroke/effects/physical/swallowing-problems",
+      "quote": "Turn off the TV … Sit up with a straight back … Don't try to eat or drink if you're feeling tired or drowsy. Try to eat or drink lying down."
+    },
+    "source_tier": "patient_org",
+    "source_status": "verified"
   },
   {
     "id": "ST-LIV-01",
@@ -370,20 +456,20 @@
     "room": "routine",
     "kind": "daily_routine",
     "action": "Caregiver does the daily foot check, soles and between toes",
-    "why": "One-sided weakness makes bending with a mirror unsafe.",
+    "why": "One-sided weakness makes bending with a mirror unsafe, and a foot they cannot see is a foot nobody checks.",
     "owner": "caregiver",
     "urgency": "this_week",
     "cost": "free",
     "fall_risk": false,
     "supersedes": ["DM-FOOT-02", "DM-FOOT-06"],
     "source": {
-      "title": "IWGDF 2023 Prevention Guideline (daily inspection); Diabetes UK — How to look after your feet",
-      "section": "Handing the check to the caregiver because of one-sided weakness is our product logic, pending clinician review",
-      "url": "https://www.diabetes.org.uk/about-diabetes/looking-after-diabetes/complications/feet/taking-care-of-your-feet",
-      "quote": "get someone else to check your feet for you"
+      "title": "IWGDF 2023 Practical Guidelines on the prevention and management of diabetes-related foot disease",
+      "section": "3.2 Educate the person; 3.3 Self-care (foot inspection)",
+      "url": "https://iwgdfguidelines.org/wp-content/uploads/2023/07/IWGDF-2023-01-Practical-Guidelines.pdf",
+      "quote": "Determine if the person is able to perform a foot inspection. If not, discuss who can assist the person in this task. Persons who have substantial visual impairment or physical inability to visualise their feet cannot adequately do the inspection"
     },
-    "source_tier": "product_logic",
-    "source_status": "needs_source"
+    "source_tier": "guideline",
+    "source_status": "verified"
   },
   {
     "id": "X-LIV-01",
@@ -399,12 +485,12 @@
     "fall_risk": true,
     "supersedes": ["ST-LIV-01"],
     "source": {
-      "title": "NHS — Falls: prevention (trip hazards); IWGDF 2023 (loss of protective sensation)",
-      "section": "Raising urgency for the combination is our product logic, pending clinician review",
+      "title": "NHS — Falls: prevention; IWGDF 2023 Practical Guidelines (minor trauma in neuropathy)",
+      "section": "NHS: preventing falls at home; IWGDF §1 pathophysiology: \"in people with neuropathy, minor trauma (e.g., from ill-fitting shoes, or an acute mechanical or thermal injury) can precipitate ulceration of the foot\". Bringing the task forward to this week when both risks apply is our scheduling choice.",
       "url": "https://www.nhs.uk/conditions/falls/prevention/",
       "quote": "do not have too much clutter at home, or things you could trip on such as loose wires or rugs"
     },
-    "source_tier": "product_logic",
-    "source_status": "needs_source"
+    "source_tier": "health_service",
+    "source_status": "verified"
   }
 ]

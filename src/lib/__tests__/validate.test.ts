@@ -51,7 +51,7 @@ describe("mergePlan (F11)", () => {
       "ST-BATH-02": { action: "Keep taking standing showers", steps: ["Continue standing showers if he refuses the seat", "Try the seat once with Maria present"] },
       "ST-ROUT-01": { action: "Lay out tomorrow's clothes before Maria leaves at 6pm" },
     });
-    const plan = mergePlan(selected, out);
+    const plan = mergePlan(selected, out, "helper Maria leaves at 6pm");
     const bath = plan.cards.find((c) => c.id === "ST-BATH-02")!;
     expect(isProtected(bath)).toBe(true);
     expect(bath.action).toBe(byId("ST-BATH-02").action);
@@ -59,6 +59,7 @@ describe("mergePlan (F11)", () => {
     const liv = plan.cards.find((c) => c.id === "ST-ROUT-01")!;
     expect(isProtected(liv)).toBe(false);
     expect(liv.action).toBe("Lay out tomorrow's clothes before Maria leaves at 6pm");
+    expect(mergePlan(selected, out).cards.find((c) => c.id === "ST-ROUT-01")!.action).toBe(byId("ST-ROUT-01").action);
   });
 
   it("T13: hide ignored on protected cards (feet, bathroom, fall-risk), kept on unprotected cards", () => {

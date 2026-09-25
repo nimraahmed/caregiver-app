@@ -3,9 +3,10 @@ import { allowRequest, rateLimited } from "@/lib/ratelimit";
 import { CARDS } from "@/lib/cards";
 import { completeJson, llmConfig } from "@/lib/llm";
 import { PLAN_SYSTEM } from "@/lib/prompts";
+import { responsibleFor } from "@/lib/responsibility";
 import { selectCards } from "@/lib/rules";
 import { profileSchema } from "@/lib/schema";
-import { contextIsEmpty, mergePlan, planOutputSchema, sanitizeContext, untailoredPlan } from "@/lib/validate";
+import { contextIsEmpty, knownFacts, mergePlan, planOutputSchema, sanitizeContext, untailoredPlan } from "@/lib/validate";
 
 export const maxDuration = 30;
 
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
       urgency: c.urgency,
       room: c.room,
       kind: c.kind,
+      done_by: responsibleFor(c, profile.caregiver),
       ...(c.reassigned_reason ? { reassigned_reason: c.reassigned_reason } : {}),
       ...(c.unsure_note ? { note: "included as a precaution; the family has not confirmed this problem" } : {}),
     })),
@@ -59,6 +61,6 @@ export async function POST(req: Request) {
     { timeoutMs: 20000, maxTokens: 3000 },
   );
 
-  const plan = mergePlan(selected, out);
+  const plan = mergePlan(selected, out, knownFacts(profile));
   return NextResponse.json({ fallback: out === null, plan });
 }

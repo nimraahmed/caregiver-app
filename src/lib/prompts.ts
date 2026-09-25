@@ -69,9 +69,10 @@ For each card:
 - A person who cannot walk or uses a wheelchair still needs every card; steps for them describe
   the fixture or object, not walking to it.
 - "owner_note": if the card is owned by the caregiver and the context names who is around,
-  say who should do it and when (max 15 words), else null. A paid helper does daily hands-on care
-  (checks, washing, reminders, tidying); buying, fitting rails and lights, changing locks and
-  learning about the condition are for the family. Do not state a frequency the card lacks.
+  say who should do it and when (max 15 words), else null. Each card's "done_by" is fixed:
+  "helper" means the paid helper does it, "family" means the family, "patient" means the person
+  themselves — name the person from the context but never move a task to someone else.
+  Do not state a frequency the card lacks.
 - A card with a "note" is a precaution: do not describe the problem it guards against as a fact
   about the person (e.g. do not say they have poor eyesight).
 - "hide_suggested": true only if the context clearly shows the card does not apply

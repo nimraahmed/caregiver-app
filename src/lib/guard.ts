@@ -30,12 +30,40 @@ export function acceptsRefusal(text: string): boolean {
   return CONTRADICTION_RE.test(text);
 }
 
+/**
+ * Chat replies are longer and often restate the family's situation ("if she refuses the seat…"),
+ * so only wording that itself proposes doing without a card counts, not clauses describing a refusal.
+ */
+export const WORKAROUND_RE =
+  /\b((continue|carry on|keep on|keep going|stick) with(out)? (the )?(standing|not using|skipping)|no need (for|to (use|fit|install|wear))|(is|are) (not (needed|necessary)|optional)|don'?t (need|have) to (use|fit|install|wear)|skip (the|it|this|that)|instead of (the|a|using|fitting|installing|wearing)|work(ing)? around (it|the|this|that)|as safe as possible without|without (a|the) (seat|chair|rail|rails|aid|stick|frame|lock)|(?<!no )standing showers?|fine (to|without) (skip|the|a))\b/i;
+
+export function proposesWorkaround(text: string): boolean {
+  return WORKAROUND_RE.test(text);
+}
+
 /** Wording that presents a home change as letting someone who needs help to move manage unsupervised. */
 export const UNSUPERVISED_RE =
   /\b(without (waiting|needing|help|you|assistance|anyone|supervision)|(on|by) (his|her|their|them)?\s?(own|self|selves)|by (him|her|them)self|independently|unaided|alone safely|manage (the )?(toilet|shower|bath|transfers?|stairs) (safely )?(on|by)|no longer needs? (help|you)|reduce[sd]? the need (to wait|for help))\b/i;
 
 export function impliesUnsupervised(text: string): boolean {
   return UNSUPERVISED_RE.test(text);
+}
+
+const TIMING_RE =
+  /\b(weekly|monthly|fortnightly|yearly|annually|(once|twice|\d+ times) (a|per|every) (day|week|month)|every (other |second |\d+ )?(day|week|month|weekend)s?|on (mon|tues|wednes|thurs|fri|satur|sun)days?|(mon|tues|wednes|thurs|fri|satur|sun)day|weekends?|(at|before|after|by|from|until|till) \d{1,2}(:\d{2})?\s?(am|pm)?)\b/gi;
+
+/**
+ * Generated text may only name a frequency, weekday or clock time that already appears in the
+ * card text or what the family wrote; anything else is an invented schedule.
+ */
+export function hasUnsupportedTiming(text: string, known: string): boolean {
+  const k = known.toLowerCase();
+  for (const m of text.matchAll(TIMING_RE)) {
+    const phrase = m[0].toLowerCase();
+    const digits = phrase.match(/\d{1,2}/)?.[0];
+    if (digits ? !k.includes(digits) : !k.includes(phrase.replace(/^on /, "").replace(/s$/, ""))) return true;
+  }
+  return false;
 }
 
 /** Context chips must be non-medical facts about the home and routine. */

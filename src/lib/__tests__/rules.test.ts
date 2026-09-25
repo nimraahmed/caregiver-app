@@ -60,12 +60,33 @@ describe("T2 diabetes only, numb + vision + stairs", () => {
 describe("T3 stroke only, right weak, grip, needs help walking", () => {
   const p = profile({ conditions: ["stroke"], weak_side: "right", grip_difficulty: true, walks: "with_help" });
   it("shows all ST cards, no DM/X", () => {
-    expect(ids(p).sort()).toEqual(["ST-BATH-01", "ST-BATH-02", "ST-BATH-03", "ST-BED-01", "ST-DRESS-01", "ST-LIV-01", "ST-LIV-02", "ST-ROUT-01"]);
+    expect(ids(p).sort()).toEqual(["ST-BATH-01", "ST-BATH-02", "ST-BATH-03", "ST-BED-01", "ST-DRESS-01", "ST-LIV-01", "ST-LIV-02", "ST-MOVE-01", "ST-ROUT-01"]);
   });
   it("bathroom cards this_week; living cards stay this_month", () => {
     expect(byId(p, "ST-BATH-01")!.urgency).toBe("this_week");
     expect(byId(p, "ST-LIV-01")!.urgency).toBe("this_month");
     expect(byId(p, "ST-LIV-02")!.urgency).toBe("this_month");
+  });
+});
+
+describe("situation cards: bathtub, transfers, memory, swallowing", () => {
+  it("stay hidden for a walking, shower-only stroke household", () => {
+    const p = profile({ conditions: ["stroke"] });
+    for (const id of ["ST-BATH-04", "ST-MOVE-01", "ST-MEM-01", "ST-MEAL-01"]) expect(ids(p)).not.toContain(id);
+  });
+  it("appear when the matching field is set, and only for stroke", () => {
+    expect(ids(profile({ conditions: ["stroke"], bathroom_type: "bathtub" }))).toContain("ST-BATH-04");
+    expect(ids(profile({ conditions: ["stroke"], bathroom_type: "both" }))).toContain("ST-BATH-04");
+    expect(ids(profile({ conditions: ["stroke"], walks: "not_walking" }))).toContain("ST-MOVE-01");
+    expect(ids(profile({ conditions: ["stroke"], memory_or_attention_issues: true }))).toContain("ST-MEM-01");
+    expect(ids(profile({ conditions: ["stroke"], swallowing_issues: true }))).toContain("ST-MEAL-01");
+    expect(ids(profile({ conditions: ["t2dm"], bathroom_type: "bathtub", walks: "not_walking", memory_or_attention_issues: true, swallowing_issues: true }))).not.toContain("ST-BATH-04");
+  });
+  it("bath and transfer cards are protected fall-risk cards", () => {
+    const p = profile({ conditions: ["stroke"], bathroom_type: "bathtub", walks: "not_walking" });
+    expect(byId(p, "ST-BATH-04")!.fall_risk).toBe(true);
+    expect(byId(p, "ST-MOVE-01")!.fall_risk).toBe(true);
+    expect(byId(p, "ST-MEAL-01")).toBeUndefined();
   });
 });
 

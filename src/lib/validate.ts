@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { acceptsRefusal, isMedicalContext, violatesGeneratedText } from "./guard";
+import { acceptsRefusal, hasUnsupportedTiming, isMedicalContext, violatesGeneratedText } from "./guard";
 import { householdContextSchema, profileSchema } from "./schema";
 import { URGENCY_ORDER, type HouseholdContext, type Profile, type SelectedCard, type Urgency } from "./types";
 
@@ -144,16 +144,22 @@ export function isProtected(card: SelectedCard): boolean {
   return card.fall_risk || card.room === "bathroom" || card.id.includes("-FOOT-") || card.unsure_note;
 }
 
-function safeText(value: string | null | undefined, max: number): string | null {
+function safeText(value: string | null | undefined, max: number, known = ""): string | null {
   if (typeof value !== "string") return null;
   const t = value.trim();
-  if (!t || t.length > max || violatesGeneratedText(t)) return null;
+  if (!t || t.length > max || violatesGeneratedText(t) || hasUnsupportedTiming(t, known)) return null;
   return t;
 }
 
-function safeStep(value: string, max: number): string | null {
-  const t = safeText(value, max);
+function safeStep(value: string, max: number, known = ""): string | null {
+  const t = safeText(value, max, known);
   return t && !acceptsRefusal(t) ? t : null;
+}
+
+/** Everything the model was told about this household: the only place a time or frequency may come from. */
+export function knownFacts(profile: Pick<Profile, "free_text" | "context">): string {
+  const ctx = profile.context ? Object.values(profile.context).flat().join(" ") : "";
+  return `${profile.free_text} ${ctx}`;
 }
 
 /** Plain rules output wrapped as a plan, used when the LLM is unavailable. */
@@ -181,7 +187,7 @@ export function untailoredPlan(selected: SelectedCard[]): TailoredPlan {
  * at most one tier and never fall, protected cards cannot be hidden, and any generated string
  * that is too long or trips the keyword guard reverts to stored text.
  */
-export function mergePlan(selected: SelectedCard[], out: PlanOutput | null): TailoredPlan {
+export function mergePlan(selected: SelectedCard[], out: PlanOutput | null, known = ""): TailoredPlan {
   if (!out) return untailoredPlan(selected);
   const byId = new Map(out.cards.map((c) => [c.id, c] as const));
   const cards: TailoredCard[] = selected.map((c) => {
@@ -190,10 +196,11 @@ export function mergePlan(selected: SelectedCard[], out: PlanOutput | null): Tai
     if (!o) return base;
 
     // Safety cards keep their source-backed action verbatim; tailoring goes into why/steps/owner note.
-    const action = isProtected(c) ? null : safeStep(o.action ?? "", LIMITS.action);
-    const why = safeText(o.why, LIMITS.why);
-    const steps = (o.steps ?? []).map((s) => safeStep(s, LIMITS.step)).filter((s): s is string => s !== null).slice(0, LIMITS.steps);
-    const ownerNote = c.owner === "caregiver" ? safeText(o.owner_note, LIMITS.note) : null;
+    const src = `${known} ${c.action} ${c.why}`;
+    const action = isProtected(c) ? null : safeStep(o.action ?? "", LIMITS.action, src);
+    const why = safeText(o.why, LIMITS.why, src);
+    const steps = (o.steps ?? []).map((s) => safeStep(s, LIMITS.step, src)).filter((s): s is string => s !== null).slice(0, LIMITS.steps);
+    const ownerNote = c.owner === "caregiver" ? safeText(o.owner_note, LIMITS.note, src) : null;
 
     let urgency: Urgency = c.urgency;
     let raisedReason: string | null = null;
@@ -233,7 +240,7 @@ export function mergePlan(selected: SelectedCard[], out: PlanOutput | null): Tai
     return a.id.localeCompare(b.id);
   });
 
-  return { summary: safeText(out.summary, LIMITS.summary), cards, tailored: true };
+  return { summary: safeText(out.summary, LIMITS.summary, known), cards, tailored: true };
 }
 
 // ---------- /api/chat ----------

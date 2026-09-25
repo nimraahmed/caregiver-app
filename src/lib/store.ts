@@ -3,6 +3,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 import type { Profile } from "./types";
 import type { TailoredPlan } from "./validate";
+import { type CheckIn, EMPTY_CHECKIN } from "./checkin";
 
 export const EMPTY_PROFILE: Profile = {
   conditions: [],
@@ -37,10 +38,23 @@ export interface AppState {
   plan: { key: string; plan: TailoredPlan; fallback: boolean } | null;
   /** Card ids the user chose to reveal after a hide suggestion. */
   revealed: string[];
+  /** ISO timestamp of the first time a plan was shown; anchors the 30-day check-in. */
+  planCreatedAt: string | null;
+  checkin: CheckIn;
 }
 
 const KEY = "hac-state-v1";
-const INITIAL: AppState = { profile: EMPTY_PROFILE, answered: [], strokeFlagAcknowledged: false, evidence: {}, parsedText: "", plan: null, revealed: [] };
+const INITIAL: AppState = {
+  profile: EMPTY_PROFILE,
+  answered: [],
+  strokeFlagAcknowledged: false,
+  evidence: {},
+  parsedText: "",
+  plan: null,
+  revealed: [],
+  planCreatedAt: null,
+  checkin: EMPTY_CHECKIN,
+};
 
 let cache: AppState | null = null;
 const listeners = new Set<() => void>();
@@ -50,7 +64,7 @@ function read(): AppState {
   try {
     const raw = window.sessionStorage.getItem(KEY);
     const parsed = raw ? (JSON.parse(raw) as Partial<AppState>) : {};
-    cache = { ...INITIAL, ...parsed, profile: { ...EMPTY_PROFILE, ...(parsed.profile ?? {}) } };
+    cache = { ...INITIAL, ...parsed, profile: { ...EMPTY_PROFILE, ...(parsed.profile ?? {}) }, checkin: { ...EMPTY_CHECKIN, ...(parsed.checkin ?? {}) } };
   } catch {
     cache = INITIAL;
   }

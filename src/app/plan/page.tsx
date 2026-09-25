@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { AlertTriangle, MessageCircle, Phone, Printer, Share2, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AlertTriangle, ClipboardCheck, FileText, MessageCircle, Phone, Printer, Share2, Sparkles } from "lucide-react";
 import { Badge, Button, Shell } from "@/components/ui";
 import { PlanCard, URGENCY_LABEL } from "@/components/PlanCard";
 import { AskSheet } from "@/components/AskSheet";
@@ -47,6 +47,11 @@ export default function PlanPage() {
   const routine = selected.filter((c) => c.kind === "daily_routine");
   const reveal = (id: string) => update((s) => ({ ...s, revealed: s.revealed.includes(id) ? s.revealed : [...s.revealed, id] }));
   const notice = softNotice(p);
+  const planShown = hydrated && !gated && p.conditions.length > 0;
+
+  useEffect(() => {
+    if (planShown) update((s) => (s.planCreatedAt ? s : { ...s, planCreatedAt: new Date().toISOString() }));
+  }, [planShown, update]);
 
   if (!hydrated) return <Shell><div className="h-40" /></Shell>;
 
@@ -136,6 +141,14 @@ export default function PlanPage() {
             <ContextChips context={p.context} />
           </div>
         )}
+        <nav className="mt-4 flex gap-2 print:hidden" aria-label="Follow-up">
+          <Link href="/checkin" className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-3 text-sm font-medium text-stone-800 hover:bg-stone-50">
+            <ClipboardCheck size={16} /> 30-day check-in
+          </Link>
+          <Link href="/summary" className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-3 text-sm font-medium text-stone-800 hover:bg-stone-50">
+            <FileText size={16} /> Summary for the care team
+          </Link>
+        </nav>
       </header>
 
       {flags.footWound && (

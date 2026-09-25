@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { CARDS } from "@/lib/cards";
-import { acceptsRefusal, impliesUnsupervised, isMedicalQuestion, REFUSAL_TEXT, violatesGeneratedText } from "@/lib/guard";
+import { impliesUnsupervised, isMedicalQuestion, proposesWorkaround, REFUSAL_TEXT, violatesGeneratedText } from "@/lib/guard";
 import { completeText, llmConfig, type ChatMessage } from "@/lib/llm";
 import { CHAT_SYSTEM } from "@/lib/prompts";
 import { allowRequest, rateLimited } from "@/lib/ratelimit";
+import { asksWhoDoesWhat, responsibleFor, responsibleLabel, whoDoesWhat } from "@/lib/responsibility";
 import { selectCards } from "@/lib/rules";
 import { chatRequestSchema, contextIsEmpty, sanitizeContext } from "@/lib/validate";
 
@@ -37,12 +38,16 @@ export async function POST(req: Request) {
   // Deterministic guard runs before any model call.
   if (isMedicalQuestion(last.content)) return text(REFUSAL_TEXT);
 
-  const cfg = llmConfig();
-  if (!cfg) return text(UNAVAILABLE, 503);
-
   // Grounding is recomputed from the library; the client only says which selected cards are visible.
   const visible = new Set(card_ids);
   const cards = selectCards(profile, CARDS).filter((c) => visible.size === 0 || visible.has(c.id));
+
+  // Responsibility follows card ownership and who is in the home, so it is answered without the model.
+  if (asksWhoDoesWhat(last.content)) return text(whoDoesWhat(cards, profile.caregiver));
+
+  const cfg = llmConfig();
+  if (!cfg) return text(UNAVAILABLE, 503);
+
   const context = sanitizeContext(profile.context);
   const grounding = {
     person: {
@@ -63,7 +68,7 @@ export async function POST(req: Request) {
       action: c.action,
       why: c.why,
       steps: (steps[c.id] ?? []).filter((s) => !violatesGeneratedText(s)),
-      done_by: c.owner === "patient" ? "the person themselves" : "whoever cares for them (family or helper)",
+      done_by: responsibleLabel(responsibleFor(c, profile.caregiver)),
       urgency: c.urgency,
       room: c.room,
     })),
@@ -82,7 +87,7 @@ export async function POST(req: Request) {
     if (answer !== REFUSAL_TEXT && answer.includes(REFUSAL_TEXT)) answer = answer.replace(REFUSAL_TEXT, "").trim();
     // The whole reply is checked before any of it is shown.
     if (violatesGeneratedText(answer)) return text(UNGROUNDED);
-    if (acceptsRefusal(answer)) return text(NOT_NEGOTIABLE);
+    if (proposesWorkaround(answer)) return text(NOT_NEGOTIABLE);
     if (profile.walks !== "independently" && impliesUnsupervised(answer)) return text(NEEDS_SUPERVISION);
     return text(answer);
   } catch {

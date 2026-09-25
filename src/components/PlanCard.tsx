@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BookOpen, ChevronDown, ChevronUp, ExternalLink, EyeOff, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui";
+import { responsibleFor } from "@/lib/responsibility";
 import type { Caregiver, SelectedCard } from "@/lib/types";
 import type { TailoredCard } from "@/lib/validate";
 
@@ -18,7 +19,8 @@ export const TIER_LABEL = {
 export function ownerLabel(card: SelectedCard, caregiver: Caregiver): { text: string; tone: "teal" | "amber" | "stone" } {
   if (card.owner === "patient") return { text: "They do this", tone: "stone" };
   if (caregiver === "none") return { text: "Needs a helper", tone: "amber" };
-  return { text: "You do this", tone: "teal" };
+  if (responsibleFor(card, caregiver) === "helper") return { text: "Helper does this", tone: "teal" };
+  return { text: caregiver === "live_in_helper" ? "Family does this" : "You do this", tone: "teal" };
 }
 
 export function PlanCard({ card, caregiver, hidden, onReveal }: { card: TailoredCard; caregiver: Caregiver; hidden?: boolean; onReveal?: () => void }) {
