@@ -86,6 +86,8 @@ export function useAppState() {
       update((s) => ({
         ...s,
         profile: { ...s.profile, ...patch },
+        // An explicit answer replaces the parsed one, so its quote no longer applies.
+        evidence: Object.fromEntries(Object.entries(s.evidence).filter(([field]) => !(field in patch) || patch[field as keyof Profile] === s.profile[field as keyof Profile])),
         strokeFlagAcknowledged:
           "new_stroke_signs" in patch && patch.new_stroke_signs !== s.profile.new_stroke_signs ? false : s.strokeFlagAcknowledged,
         answered: questionId && !s.answered.includes(questionId) ? [...s.answered, questionId] : s.answered,
