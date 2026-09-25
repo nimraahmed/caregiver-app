@@ -1,0 +1,410 @@
+[
+  {
+    "id": "DM-FOOT-01",
+    "conditions": ["t2dm"],
+    "triggers": [{ "field": "foot_numbness", "op": "truthy" }],
+    "room": "bedroom",
+    "kind": "home_change",
+    "action": "Keep firm-soled closed slippers by the bed and every door",
+    "why": "Walking barefoot, in socks or thin slippers can cause cuts they won't feel.",
+    "owner": "patient",
+    "urgency": "this_week",
+    "cost": "low",
+    "fall_risk": false,
+    "source": {
+      "title": "IWGDF 2023 Guideline on the prevention of foot ulcers in persons with diabetes",
+      "section": "Recommendation 3",
+      "url": "https://iwgdfguidelines.org/wp-content/uploads/2023/07/IWGDF-2023-02-Prevention-Guideline.pdf",
+      "quote": "not walking barefoot, not walking in socks without shoes, and not walking in thin-soled slippers, either at home or outside"
+    },
+    "source_tier": "guideline",
+    "source_status": "verified"
+  },
+  {
+    "id": "DM-FOOT-02",
+    "conditions": ["t2dm"],
+    "triggers": [{ "field": "foot_numbness", "op": "truthy" }],
+    "reassign_if": [
+      [{ "field": "weak_side", "op": "neq", "value": "none" }],
+      [{ "field": "vision_reduced", "op": "truthy" }]
+    ],
+    "reassign_reason": "One-sided weakness or poor eyesight makes a reliable self-check hard",
+    "room": "routine",
+    "kind": "daily_routine",
+    "action": "Check both feet daily, including soles and between toes",
+    "why": "Numb feet hide small wounds until they become serious.",
+    "owner": "patient",
+    "urgency": "this_week",
+    "cost": "free",
+    "fall_risk": false,
+    "source": {
+      "title": "IWGDF 2023 Prevention Guideline; Diabetes UK — How to look after your feet",
+      "section": "IWGDF Recommendation 6 (daily foot inspection); Diabetes UK step 3",
+      "url": "https://www.diabetes.org.uk/about-diabetes/looking-after-diabetes/complications/feet/taking-care-of-your-feet",
+      "quote": "check them every day… or get someone else to check your feet for you"
+    },
+    "source_tier": "guideline",
+    "source_status": "verified"
+  },
+  {
+    "id": "DM-FOOT-03",
+    "conditions": ["t2dm"],
+    "triggers": [{ "field": "foot_numbness", "op": "truthy" }],
+    "reassign_if": [[{ "field": "weak_side", "op": "neq", "value": "none" }]],
+    "reassign_reason": "One-sided weakness makes reaching and drying both feet unsafe",
+    "room": "routine",
+    "kind": "daily_routine",
+    "action": "Wash feet daily and dry carefully between the toes",
+    "why": "Moisture between toes lets skin break down.",
+    "owner": "patient",
+    "urgency": "this_week",
+    "cost": "free",
+    "fall_risk": false,
+    "source": {
+      "title": "IWGDF 2023 Guideline on the prevention of foot ulcers in persons with diabetes",
+      "section": "Recommendation 4",
+      "url": "https://iwgdfguidelines.org/wp-content/uploads/2023/07/IWGDF-2023-02-Prevention-Guideline.pdf",
+      "quote": "wash their feet daily (with careful drying, particularly between the toes)"
+    },
+    "source_tier": "guideline",
+    "source_status": "verified"
+  },
+  {
+    "id": "DM-FOOT-04",
+    "conditions": ["t2dm"],
+    "triggers": [{ "field": "foot_numbness", "op": "truthy" }],
+    "reassign_if": [
+      [{ "field": "vision_reduced", "op": "truthy" }],
+      [{ "field": "grip_difficulty", "op": "eq", "value": true }]
+    ],
+    "reassign_reason": "Poor eyesight or a weak grip makes nail cutting risky",
+    "room": "routine",
+    "kind": "daily_routine",
+    "action": "Cut toenails straight across",
+    "why": "Reduces ingrown nails and cuts.",
+    "owner": "patient",
+    "urgency": "this_month",
+    "cost": "free",
+    "fall_risk": false,
+    "source": {
+      "title": "IWGDF 2023 Guideline on the prevention of foot ulcers in persons with diabetes",
+      "section": "Recommendation 4",
+      "url": "https://iwgdfguidelines.org/wp-content/uploads/2023/07/IWGDF-2023-02-Prevention-Guideline.pdf",
+      "quote": "cut toenails straight across"
+    },
+    "source_tier": "guideline",
+    "source_status": "verified"
+  },
+  {
+    "id": "DM-FOOT-05",
+    "conditions": ["t2dm"],
+    "triggers": [{ "field": "foot_numbness", "op": "truthy" }],
+    "room": "bedroom",
+    "kind": "home_change",
+    "action": "Choose seamless socks; avoid tight socks",
+    "why": "Seams and tight bands press on skin they can't feel.",
+    "owner": "patient",
+    "urgency": "this_month",
+    "cost": "low",
+    "fall_risk": false,
+    "source": {
+      "title": "IWGDF 2023 Guideline on the prevention of foot ulcers in persons with diabetes",
+      "section": "Recommendation 8 rationale",
+      "url": "https://iwgdfguidelines.org/wp-content/uploads/2023/07/IWGDF-2023-02-Prevention-Guideline.pdf",
+      "quote": "wear socks that are seamless and not too tight"
+    },
+    "source_tier": "guideline",
+    "source_status": "verified"
+  },
+  {
+    "id": "DM-FOOT-06",
+    "conditions": ["t2dm"],
+    "triggers": [{ "field": "foot_numbness", "op": "truthy" }],
+    "room": "bedroom",
+    "kind": "home_change",
+    "action": "Keep a long-handled mirror in the bedroom for checking soles",
+    "why": "Lets them see the soles without bending far.",
+    "owner": "patient",
+    "urgency": "this_week",
+    "cost": "low",
+    "fall_risk": false,
+    "source": {
+      "title": "Diabetes UK — How to look after your feet",
+      "section": "Step 3: Check your feet every day",
+      "url": "https://www.diabetes.org.uk/about-diabetes/looking-after-diabetes/complications/feet/taking-care-of-your-feet",
+      "quote": "If you struggle to lift your feet up, try using a mirror to check the bottom of your feet"
+    },
+    "source_tier": "patient_org",
+    "source_status": "verified"
+  },
+  {
+    "id": "DM-FOOT-07",
+    "conditions": ["t2dm"],
+    "triggers": [{ "field": "foot_numbness", "op": "truthy" }],
+    "room": "routine",
+    "kind": "daily_routine",
+    "action": "Feel inside shoes before putting them on",
+    "why": "A stone or pin inside won't be felt.",
+    "owner": "patient",
+    "urgency": "this_week",
+    "cost": "free",
+    "fall_risk": false,
+    "source": {
+      "title": "IWGDF 2023 Guideline on the prevention of foot ulcers in persons with diabetes",
+      "section": "Recommendation 8 rationale",
+      "url": "https://iwgdfguidelines.org/wp-content/uploads/2023/07/IWGDF-2023-02-Prevention-Guideline.pdf",
+      "quote": "check the inside of the shoe for any foreign objects each time before they don the footwear"
+    },
+    "source_tier": "guideline",
+    "source_status": "verified"
+  },
+  {
+    "id": "DM-VIS-01",
+    "conditions": ["t2dm"],
+    "triggers": [{ "field": "vision_reduced", "op": "truthy" }],
+    "room": "whole_home",
+    "kind": "home_change",
+    "action": "Add night-lights on the route from bed to toilet",
+    "why": "Poor eyesight plus darkness raises fall risk.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "low",
+    "fall_risk": true,
+    "source": {
+      "title": "Thomas Pocklington Trust — Lighting in and around the home: a guide for people with sight loss; RNIB — Safety at home",
+      "section": "Light, sight and falls",
+      "url": "https://www.rnib.org.uk/living-with-sight-loss/independent-living/safety-at-home/",
+      "quote": "improving lighting in areas such as the bathroom and at the top and bottom of stairs"
+    },
+    "source_tier": "patient_org",
+    "source_status": "verified"
+  },
+  {
+    "id": "DM-VIS-02",
+    "conditions": ["t2dm"],
+    "triggers": [
+      { "field": "vision_reduced", "op": "truthy" },
+      { "field": "stairs_used_daily", "op": "eq", "value": true }
+    ],
+    "room": "stairs_entrance",
+    "kind": "home_change",
+    "action": "Brighten lighting on stairs and mark step edges with contrasting tape",
+    "why": "Step edges are hard to see with reduced vision.",
+    "owner": "caregiver",
+    "urgency": "this_month",
+    "cost": "low",
+    "fall_risk": true,
+    "source": {
+      "title": "Thomas Pocklington Trust — Lighting in and around the home; RNIB — Safety at home",
+      "section": "Stairs",
+      "url": "https://www.housinglin.org.uk/_assets/Resources/Housing/OtherOrganisation/Lighting-in-and-around-around-the-home-A-guide-to-better-lighting-for-people-with-sight-loss.pdf",
+      "quote": "Appropriate domestic lighting, especially near the top and bottom of stairs, is very important to falls avoidance"
+    },
+    "source_tier": "patient_org",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-BATH-01",
+    "conditions": ["stroke"],
+    "room": "bathroom",
+    "kind": "home_change",
+    "action": "Fit grab rails beside the toilet and in the shower",
+    "why": "Falls after stroke are common; rails give a fixed hold when sitting down or standing up.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "medium",
+    "fall_risk": true,
+    "source": {
+      "title": "NHS — Falls: prevention; Stroke Association — Equipment for stroke survivors at home",
+      "section": "Bathroom aids",
+      "url": "https://www.nhs.uk/conditions/falls/prevention/",
+      "quote": "consider fitting grab rails in the bathroom"
+    },
+    "source_tier": "health_service",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-BATH-02",
+    "conditions": ["stroke"],
+    "room": "bathroom",
+    "kind": "home_change",
+    "action": "Use a shower seat; no standing showers",
+    "why": "One-sided weakness makes balance unreliable on wet floors.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "medium",
+    "fall_risk": true,
+    "source": {
+      "title": "Stroke Association — Equipment for stroke survivors at home",
+      "section": "Bathroom aids",
+      "url": "https://www.stroke.org.uk/stroke/life-after/equipment-independent-living",
+      "quote": "Bath and shower seats so you can sit down while bathing"
+    },
+    "source_tier": "patient_org",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-BATH-03",
+    "conditions": ["stroke"],
+    "room": "bathroom",
+    "kind": "home_change",
+    "action": "Remove the bathroom door lock or fit one that opens from outside",
+    "why": "If they fall inside, you need to get in.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "low",
+    "fall_risk": true,
+    "source": {
+      "title": "Occupational therapy convention — pending clinician review",
+      "section": "No UK/UAE guideline statement found"
+    },
+    "source_tier": "product_logic",
+    "source_status": "needs_source"
+  },
+  {
+    "id": "ST-LIV-01",
+    "conditions": ["stroke"],
+    "room": "living",
+    "kind": "home_change",
+    "action": "Remove loose rugs and cables from walking routes",
+    "why": "Trips are a leading cause of falls after stroke.",
+    "owner": "caregiver",
+    "urgency": "this_month",
+    "cost": "free",
+    "fall_risk": true,
+    "source": {
+      "title": "NHS — Falls: prevention",
+      "section": "Preventing falls at home",
+      "url": "https://www.nhs.uk/conditions/falls/prevention/",
+      "quote": "do not have too much clutter at home, or things you could trip on such as loose wires or rugs"
+    },
+    "source_tier": "health_service",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-LIV-02",
+    "conditions": ["stroke"],
+    "room": "living",
+    "kind": "home_change",
+    "action": "Provide a firm, higher chair with armrests",
+    "why": "Soft, low seats are hard to get out of with weak limbs.",
+    "owner": "caregiver",
+    "urgency": "this_month",
+    "cost": "medium",
+    "fall_risk": true,
+    "source": {
+      "title": "Worcestershire Acute Hospitals NHS Trust — Occupational therapy: Choosing a chair",
+      "url": "https://www.worcsacute.nhs.uk/documents/patient-information-leaflets/occupational-therapy/choosing-a-chair/?layout=file",
+      "quote": "the seat should be firm and flat; armrests make it easier to push into standing"
+    },
+    "source_tier": "health_service",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-BED-01",
+    "conditions": ["stroke"],
+    "triggers": [{ "field": "weak_side", "op": "in", "value": ["left", "right"] }],
+    "room": "bedroom",
+    "kind": "home_change",
+    "action": "Put phone, lamp and water within reach on the stronger side",
+    "why": "They can reach help without twisting or getting up.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "free",
+    "fall_risk": true,
+    "source": {
+      "title": "American Stroke Association — Modify the bedroom to match your abilities",
+      "url": "https://www.stroke.org/en/life-after-stroke/recovery/home-modifications/modify-the-bedroom-to-match-your-abilities",
+      "quote": "Keep a cell phone or corded phone within reach at bedside"
+    },
+    "source_tier": "patient_org",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-DRESS-01",
+    "conditions": ["stroke"],
+    "triggers": [{ "field": "grip_difficulty", "op": "eq", "value": true }],
+    "room": "bedroom",
+    "kind": "home_change",
+    "action": "Switch to elastic waists and velcro or popper closures",
+    "why": "Buttons and zips are hard with a weak hand.",
+    "owner": "caregiver",
+    "urgency": "when_you_can",
+    "cost": "low",
+    "fall_risk": false,
+    "source": {
+      "title": "Stroke Association — Guide to dressing after stroke",
+      "url": "https://www.stroke.org.uk/blog/able-labels-guide-dressing-after-stroke",
+      "quote": "Avoid buttons and zips… substitute these for touch-close alternatives like Velcro or poppers"
+    },
+    "source_tier": "patient_org",
+    "source_status": "verified"
+  },
+  {
+    "id": "ST-ROUT-01",
+    "conditions": ["stroke"],
+    "room": "routine",
+    "kind": "daily_routine",
+    "action": "Learn the common problems after stroke: frequent falls, shoulder pain, stiffness, incontinence",
+    "why": "Spotting them early means getting help sooner.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "free",
+    "fall_risk": false,
+    "source": {
+      "title": "NICE NG236 — Stroke rehabilitation in adults (2023)",
+      "section": "Recommendation 1.17.2",
+      "url": "https://www.nice.org.uk/guidance/ng236/chapter/Recommendations",
+      "quote": "Provide information so that people after stroke, and their family and carers, can recognise the complications of the condition, including frequent falls, spasticity, shoulder pain and incontinence"
+    },
+    "source_tier": "guideline",
+    "source_status": "verified"
+  },
+  {
+    "id": "X-FOOT-01",
+    "conditions": ["t2dm", "stroke"],
+    "triggers": [
+      { "field": "foot_numbness", "op": "truthy" },
+      { "field": "weak_side", "op": "neq", "value": "none" }
+    ],
+    "room": "routine",
+    "kind": "daily_routine",
+    "action": "Caregiver does the daily foot check, soles and between toes",
+    "why": "One-sided weakness makes bending with a mirror unsafe.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "free",
+    "fall_risk": false,
+    "supersedes": ["DM-FOOT-02", "DM-FOOT-06"],
+    "source": {
+      "title": "IWGDF 2023 Prevention Guideline (daily inspection); Diabetes UK — How to look after your feet",
+      "section": "Handing the check to the caregiver because of one-sided weakness is our product logic, pending clinician review",
+      "url": "https://www.diabetes.org.uk/about-diabetes/looking-after-diabetes/complications/feet/taking-care-of-your-feet",
+      "quote": "get someone else to check your feet for you"
+    },
+    "source_tier": "product_logic",
+    "source_status": "needs_source"
+  },
+  {
+    "id": "X-LIV-01",
+    "conditions": ["t2dm", "stroke"],
+    "triggers": [{ "field": "foot_numbness", "op": "truthy" }],
+    "room": "living",
+    "kind": "home_change",
+    "action": "Clear the hallway of rugs and clutter this week",
+    "why": "A trip is now dangerous twice: a fall, and an injury they may not feel.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "free",
+    "fall_risk": true,
+    "supersedes": ["ST-LIV-01"],
+    "source": {
+      "title": "NHS — Falls: prevention (trip hazards); IWGDF 2023 (loss of protective sensation)",
+      "section": "Raising urgency for the combination is our product logic, pending clinician review",
+      "url": "https://www.nhs.uk/conditions/falls/prevention/",
+      "quote": "do not have too much clutter at home, or things you could trip on such as loose wires or rugs"
+    },
+    "source_tier": "product_logic",
+    "source_status": "needs_source"
+  }
+]
