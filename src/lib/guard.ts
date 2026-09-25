@@ -30,6 +30,14 @@ export function acceptsRefusal(text: string): boolean {
   return CONTRADICTION_RE.test(text);
 }
 
+/** Wording that presents a home change as letting someone who needs help to move manage unsupervised. */
+export const UNSUPERVISED_RE =
+  /\b(without (waiting|needing|help|you|assistance|anyone|supervision)|(on|by) (his|her|their|them)?\s?(own|self|selves)|by (him|her|them)self|independently|unaided|alone safely|manage (the )?(toilet|shower|bath|transfers?|stairs) (safely )?(on|by)|no longer needs? (help|you)|reduce[sd]? the need (to wait|for help))\b/i;
+
+export function impliesUnsupervised(text: string): boolean {
+  return UNSUPERVISED_RE.test(text);
+}
+
 /** Context chips must be non-medical facts about the home and routine. */
 export function isMedicalContext(text: string): boolean {
   return CONTEXT_MEDICAL_RE.test(text);

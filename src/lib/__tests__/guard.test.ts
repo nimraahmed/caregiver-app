@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARDS } from "../cards";
-import { acceptsRefusal, isMedicalQuestion, REFUSAL_TEXT, violatesGeneratedText } from "../guard";
+import { acceptsRefusal, impliesUnsupervised, isMedicalQuestion, REFUSAL_TEXT, violatesGeneratedText } from "../guard";
 
 describe("chat guard (T14)", () => {
   it.each(["how much insulin should he take", "is this a stroke?", "what should he eat", "can he skip his tablets", "how many mg of paracetamol"])("refuses %s", (q) => {
@@ -35,5 +35,16 @@ describe("refusal-acceptance guard", () => {
   it("allows stored card text and introduction advice", () => {
     for (const c of CARDS) expect(acceptsRefusal(c.action)).toBe(false);
     expect(acceptsRefusal("Use a shower seat; no standing showers. Try it once with Maria present.")).toBe(false);
+  });
+});
+
+describe("unsupervised-mobility guard", () => {
+  it("flags wording that lets a non-walker manage alone", () => {
+    expect(impliesUnsupervised("Fit grab rails so he can use the toilet without waiting for you")).toBe(true);
+    expect(impliesUnsupervised("These changes reduce the need to wait for you")).toBe(true);
+    expect(impliesUnsupervised("He can then shower on his own")).toBe(true);
+  });
+  it("allows stored card text", () => {
+    for (const c of CARDS) expect(impliesUnsupervised(c.action + " " + c.why)).toBe(false);
   });
 });

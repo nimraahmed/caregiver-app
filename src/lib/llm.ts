@@ -46,7 +46,11 @@ async function complete(cfg: LlmConfig, opts: CompletionOptions): Promise<string
       signal: ctrl.signal,
     });
     if (!res.ok) throw new Error(`LLM ${res.status}: ${(await res.text()).slice(0, 200)}`);
-    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const data = (await res.json()) as {
+      choices?: { message?: { content?: string } }[];
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
+    };
+    if (data.usage) console.info("llm: usage", data.usage.prompt_tokens, data.usage.completion_tokens);
     const content = data.choices?.[0]?.message?.content;
     if (typeof content !== "string") throw new Error("LLM: empty response");
     return content;

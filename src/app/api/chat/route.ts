@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { CARDS } from "@/lib/cards";
-import { acceptsRefusal, isMedicalQuestion, REFUSAL_TEXT, violatesGeneratedText } from "@/lib/guard";
+import { acceptsRefusal, impliesUnsupervised, isMedicalQuestion, REFUSAL_TEXT, violatesGeneratedText } from "@/lib/guard";
 import { completeText, llmConfig, type ChatMessage } from "@/lib/llm";
 import { CHAT_SYSTEM } from "@/lib/prompts";
 import { allowRequest, rateLimited } from "@/lib/ratelimit";
@@ -12,6 +12,8 @@ export const maxDuration = 30;
 const MAX_USER_TURNS = 6;
 const UNAVAILABLE = "The assistant is unavailable right now. The plan above still applies.";
 const UNGROUNDED = "I can only help with the home changes in your plan. Please ask their doctor or nurse about anything medical.";
+const NEEDS_SUPERVISION =
+  "The changes in the plan make moving around safer, but they don't replace having someone there — with their mobility, getting to the toilet, shower or bed still needs a person present. Ask their nurse or occupational therapist about transfer aids and a routine that works around when you are home.";
 const NOT_NEGOTIABLE =
   "The plan items stand as written — they are there to prevent a fall or injury, so I can't suggest a way around one. Try introducing it once with someone present, and ask their nurse or occupational therapist for help if it is still refused.";
 
@@ -43,12 +45,25 @@ export async function POST(req: Request) {
   const cards = selectCards(profile, CARDS).filter((c) => visible.size === 0 || visible.has(c.id));
   const context = sanitizeContext(profile.context);
   const grounding = {
+    person: {
+      conditions: profile.conditions,
+      walks: profile.walks,
+      weak_side: profile.weak_side,
+      grip_difficulty: profile.grip_difficulty,
+      vision_reduced: profile.vision_reduced,
+      memory_or_attention_issues: profile.memory_or_attention_issues,
+      home_type: profile.home_type,
+      stairs_used_daily: profile.stairs_used_daily,
+      bathroom_type: profile.bathroom_type,
+      caregiver: profile.caregiver,
+      alone_hours_per_day: profile.alone_hours_per_day,
+    },
     context: contextIsEmpty(context) ? null : context,
     cards: cards.map((c) => ({
       action: c.action,
       why: c.why,
       steps: (steps[c.id] ?? []).filter((s) => !violatesGeneratedText(s)),
-      owner: c.owner,
+      done_by: c.owner === "patient" ? "the person themselves" : "whoever cares for them (family or helper)",
       urgency: c.urgency,
       room: c.room,
     })),
@@ -68,6 +83,7 @@ export async function POST(req: Request) {
     // The whole reply is checked before any of it is shown.
     if (violatesGeneratedText(answer)) return text(UNGROUNDED);
     if (acceptsRefusal(answer)) return text(NOT_NEGOTIABLE);
+    if (profile.walks !== "independently" && impliesUnsupervised(answer)) return text(NEEDS_SUPERVISION);
     return text(answer);
   } catch {
     return text(UNAVAILABLE, 503);

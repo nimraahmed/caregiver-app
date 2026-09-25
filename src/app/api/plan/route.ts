@@ -45,6 +45,7 @@ export async function POST(req: Request) {
       room: c.room,
       kind: c.kind,
       ...(c.reassigned_reason ? { reassigned_reason: c.reassigned_reason } : {}),
+      ...(c.unsure_note ? { note: "included as a precaution; the family has not confirmed this problem" } : {}),
     })),
   };
 
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
       { role: "system", content: PLAN_SYSTEM },
       { role: "user", content: JSON.stringify(payload) },
     ],
-    { timeoutMs: 20000, maxTokens: 6000 },
+    { timeoutMs: 20000, maxTokens: 3000 },
   );
 
   const plan = mergePlan(selected, out);
