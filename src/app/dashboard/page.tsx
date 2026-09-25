@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ClipboardCheck, FileText, ListChecks, RotateCcw } from "lucide-react";
 import { Badge, Shell } from "@/components/ui";
 import { URGENCY_LABEL, ownerLabel } from "@/components/PlanCard";
@@ -19,6 +20,7 @@ function formatDate(iso: string | null): string | null {
 
 export default function DashboardPage() {
   const { state, hydrated, reset } = useAppState();
+  const router = useRouter();
   const p = state.profile;
 
   if (!hydrated) return <Shell><div className="h-40" /></Shell>;
@@ -116,7 +118,10 @@ export default function DashboardPage() {
         <button
           type="button"
           onClick={() => {
-            if (window.confirm("Start over? This removes the plan and check-in from this device.")) reset();
+            if (window.confirm("Start over? This removes the plan and check-in from this device.")) {
+              reset();
+              router.push("/intake");
+            }
           }}
           className="flex min-h-12 items-center gap-3 rounded-xl px-4 text-sm text-stone-500 hover:text-stone-700"
         >

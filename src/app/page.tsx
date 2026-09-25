@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Home, ListChecks, BookOpenCheck } from "lucide-react";
 import { Shell } from "@/components/ui";
 import { useAppState } from "@/lib/store";
 
 export default function WelcomePage() {
-  const { state, hydrated } = useAppState();
+  const { state, hydrated, reset } = useAppState();
+  const router = useRouter();
   const hasPlan = hydrated && state.profile.conditions.length > 0 && state.planCreatedAt !== null;
   return (
     <Shell>
@@ -27,9 +29,16 @@ export default function WelcomePage() {
           <li className="flex gap-3"><BookOpenCheck className="mt-0.5 shrink-0 text-teal-700" size={20} /> Sources on every recommendation</li>
         </ul>
         <div>
-          <Link href="/intake" className="block w-full rounded-xl bg-teal-700 px-5 py-4 text-center text-lg font-medium text-white hover:bg-teal-800">
-            Start
-          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              reset();
+              router.push("/intake");
+            }}
+            className="block w-full rounded-xl bg-teal-700 px-5 py-4 text-center text-lg font-medium text-white hover:bg-teal-800"
+          >
+            {hasPlan ? "Start for someone else" : "Start"}
+          </button>
           {hasPlan && (
             <Link href="/dashboard" className="mt-3 block w-full rounded-xl border border-stone-300 bg-white px-5 py-4 text-center text-base font-medium text-stone-800 hover:bg-stone-50">
               Continue with {state.patientName.trim() || "the saved plan"}
