@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 import { Badge, Button, Choice, Shell } from "@/components/ui";
 import { URGENCY_LABEL } from "@/components/PlanCard";
@@ -16,7 +15,6 @@ import { URGENCY_ORDER } from "@/lib/types";
 export default function CheckInPage() {
   const { state, hydrated, update } = useAppState();
   const router = useRouter();
-  const [saved, setSaved] = useState(false);
   const p = state.profile;
 
   if (!hydrated) return <Shell><div className="h-40" /></Shell>;
@@ -45,7 +43,7 @@ export default function CheckInPage() {
   const setNear = (near_falls: boolean) => update((s) => ({ ...s, checkin: { ...s.checkin, near_falls } }));
   const save = () => {
     update((s) => ({ ...s, checkin: { ...s.checkin, saved_at: new Date().toISOString() } }));
-    setSaved(true);
+    router.push("/dashboard");
   };
 
   return (
@@ -56,7 +54,7 @@ export default function CheckInPage() {
             <span className="flex items-center justify-center gap-2"><ArrowLeft size={18} /> Plan</span>
           </Button>
           <Button onClick={save} className="flex-1">
-            <span className="flex items-center justify-center gap-2"><Check size={18} /> {saved ? "Saved" : "Save check-in"}</span>
+            <span className="flex items-center justify-center gap-2"><Check size={18} /> Save check-in</span>
           </Button>
         </>
       }

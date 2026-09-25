@@ -16,17 +16,18 @@ export const TIER_LABEL = {
   product_logic: "Our reasoning, advice cited",
 } as const;
 
-export function ownerLabel(card: SelectedCard, caregiver: Caregiver): { text: string; tone: "teal" | "amber" | "stone" } {
-  if (card.owner === "patient") return { text: "They do this", tone: "stone" };
+export function ownerLabel(card: SelectedCard, caregiver: Caregiver, patientName = ""): { text: string; tone: "teal" | "amber" | "stone" } {
+  const who = patientName.trim() || "They";
+  if (card.owner === "patient") return { text: `${who} ${who === "They" ? "do" : "does"} this`, tone: "stone" };
   if (caregiver === "none") return { text: "Needs a helper", tone: "amber" };
   if (responsibleFor(card, caregiver) === "helper") return { text: "Helper does this", tone: "teal" };
-  return { text: caregiver === "live_in_helper" ? "Family does this" : "You do this", tone: "teal" };
+  return { text: "Family does this", tone: "teal" };
 }
 
-export function PlanCard({ card, caregiver, hidden, onReveal }: { card: TailoredCard; caregiver: Caregiver; hidden?: boolean; onReveal?: () => void }) {
+export function PlanCard({ card, caregiver, patientName, hidden, onReveal }: { card: TailoredCard; caregiver: Caregiver; patientName?: string; hidden?: boolean; onReveal?: () => void }) {
   const [showSource, setShowSource] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
-  const owner = ownerLabel(card, caregiver);
+  const owner = ownerLabel(card, caregiver, patientName);
 
   if (hidden) {
     return (
@@ -56,7 +57,7 @@ export function PlanCard({ card, caregiver, hidden, onReveal }: { card: Tailored
         <Badge>{COST_LABEL[card.cost]}</Badge>
         {card.tailored && !showOriginal && (
           <Badge tone="teal">
-            <span className="inline-flex items-center gap-1"><Sparkles size={12} /> For your home</span>
+            <span className="inline-flex items-center gap-1"><Sparkles size={12} /> Tailored to your home</span>
           </Badge>
         )}
       </div>

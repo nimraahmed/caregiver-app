@@ -1,5 +1,5 @@
 import { CHECKIN_DAY, type CheckIn, FALLS_LABEL, summarizeCheckIn } from "./checkin";
-import { LABELS } from "./questions";
+import { LABELS, dailyTrue } from "./questions";
 import { redFlags } from "./redflags";
 import { responsibleFor, responsibleLabel } from "./responsibility";
 import type { Profile, SelectedCard, Urgency } from "./types";
@@ -43,6 +43,8 @@ export function profileFacts(p: Profile): SummaryFact[] {
     { label: "Help at home", value: LABELS.caregiver[p.caregiver] },
     { label: "Alone per day", value: LABELS.alone_hours_per_day[p.alone_hours_per_day] },
   );
+  const daily = dailyTrue(p);
+  if (daily.length) facts.push({ label: "Normal day", value: daily.join("; ") });
   return facts;
 }
 

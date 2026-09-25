@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { Home, ListChecks, BookOpenCheck } from "lucide-react";
 import { Shell } from "@/components/ui";
+import { useAppState } from "@/lib/store";
 
 export default function WelcomePage() {
+  const { state, hydrated } = useAppState();
+  const hasPlan = hydrated && state.profile.conditions.length > 0 && state.planCreatedAt !== null;
   return (
     <Shell>
       <div className="flex min-h-[70dvh] flex-col justify-center gap-8">
@@ -25,6 +30,11 @@ export default function WelcomePage() {
           <Link href="/intake" className="block w-full rounded-xl bg-teal-700 px-5 py-4 text-center text-lg font-medium text-white hover:bg-teal-800">
             Start
           </Link>
+          {hasPlan && (
+            <Link href="/dashboard" className="mt-3 block w-full rounded-xl border border-stone-300 bg-white px-5 py-4 text-center text-base font-medium text-stone-800 hover:bg-stone-50">
+              Continue with {state.patientName.trim() || "the saved plan"}
+            </Link>
+          )}
           <p className="mt-4 text-center text-xs text-stone-500">
             This tool helps with the home and daily routine. It does not give medical advice, diagnose, or replace a doctor or nurse.
           </p>

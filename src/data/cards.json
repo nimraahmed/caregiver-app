@@ -18,7 +18,8 @@
       "quote": "not walking barefoot, not walking in socks without shoes, and not walking in thin-soled slippers, either at home or outside"
     },
     "source_tier": "guideline",
-    "source_status": "verified"
+    "source_status": "verified",
+    "supersedes": ["G-FOOT-01"]
   },
   {
     "id": "DM-FOOT-02",
@@ -177,7 +178,8 @@
       "quote": "improving lighting in areas such as the bathroom and at the top and bottom of stairs"
     },
     "source_tier": "patient_org",
-    "source_status": "verified"
+    "source_status": "verified",
+    "supersedes": ["G-NIGHT-01"]
   },
   {
     "id": "DM-VIS-02",
@@ -491,6 +493,86 @@
       "quote": "do not have too much clutter at home, or things you could trip on such as loose wires or rugs"
     },
     "source_tier": "health_service",
+    "source_status": "verified"
+  },
+  {
+    "id": "G-NIGHT-01",
+    "conditions": ["t2dm", "stroke"],
+    "triggers": [{ "field": "night_toilet", "op": "eq", "value": true }],
+    "room": "whole_home",
+    "kind": "home_change",
+    "action": "Put a night-light or motion-activated light on the route from bed to toilet",
+    "why": "Getting up in the dark is when night-time falls happen; a lit route removes the guesswork.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "low",
+    "fall_risk": true,
+    "source": { "title": "Age UK — Preventing falls", "section": "Making your home safer", "url": "https://www.ageuk.org.uk/information-advice/health-wellbeing/exercise/falls-prevention/", "quote": "If you wake up during the night, consider installing a night light near the bed to make sure you can see where you’re going. You could install a motion-activated light that comes on as needed." },
+    "source_tier": "patient_org",
+    "source_status": "verified"
+  },
+  {
+    "id": "G-FOOT-01",
+    "conditions": ["t2dm", "stroke"],
+    "triggers": [{ "field": "barefoot_indoors", "op": "eq", "value": true }],
+    "room": "routine",
+    "kind": "daily_routine",
+    "action": "Wear well-fitting shoes or slippers with grip indoors, not socks or bare feet",
+    "why": "Socks and bare feet slip on hard floors; loose slippers catch on edges.",
+    "owner": "patient",
+    "urgency": "this_week",
+    "cost": "low",
+    "fall_risk": true,
+    "source": { "title": "NHS — Falls: prevention", "section": "How to prevent falls", "url": "https://www.nhs.uk/conditions/falls/prevention/", "quote": "wear shoes or slippers that fit well, do not slip off and have a good grip" },
+    "source_tier": "health_service",
+    "source_status": "verified"
+  },
+  {
+    "id": "G-ALARM-01",
+    "conditions": ["t2dm", "stroke"],
+    "triggers": [{ "field": "phone_out_of_reach", "op": "eq", "value": true }, { "field": "alone_hours_per_day", "op": "neq", "value": "0" }],
+    "room": "whole_home",
+    "kind": "home_change",
+    "action": "Keep a phone or personal alarm on them whenever they are alone",
+    "why": "If they fall while alone, being able to call for help is what limits the harm.",
+    "owner": "caregiver",
+    "urgency": "this_week",
+    "cost": "low",
+    "fall_risk": true,
+    "source": { "title": "NHS — Falls: prevention", "section": "How to prevent falls", "url": "https://www.nhs.uk/conditions/falls/prevention/", "quote": "wear a personal alarm, or carry a mobile phone with you" },
+    "source_tier": "health_service",
+    "source_status": "verified"
+  },
+  {
+    "id": "G-BATH-01",
+    "conditions": ["t2dm", "stroke"],
+    "room": "bathroom",
+    "kind": "home_change",
+    "action": "Put a non-slip mat in the shower or bath",
+    "why": "Wet floors are the most common place to slip at home.",
+    "owner": "caregiver",
+    "urgency": "this_month",
+    "cost": "low",
+    "fall_risk": true,
+    "source": { "title": "NHS — Falls: prevention", "section": "How to prevent falls", "url": "https://www.nhs.uk/conditions/falls/prevention/", "quote": "use a non-slip mat in the bath or shower" },
+    "source_tier": "health_service",
+    "source_status": "verified",
+    "triggers": [{ "field": "walks", "op": "in", "value": ["with_aid", "with_help"] }]
+  },
+  {
+    "id": "ST-KIT-01",
+    "conditions": ["stroke"],
+    "triggers": [{ "field": "cooks_alone", "op": "eq", "value": true }],
+    "room": "kitchen",
+    "kind": "home_change",
+    "action": "Set the kitchen up for one hand: kettle tipper, non-slip mat under plates and bowls, everything used daily at counter height",
+    "why": "After a stroke, lifting a full kettle or steadying a bowl with a weak hand is a burn and spill risk.",
+    "owner": "caregiver",
+    "urgency": "this_month",
+    "cost": "low",
+    "fall_risk": false,
+    "source": { "title": "Stroke Association — Equipment for independent living", "section": "Kitchen aids", "url": "https://www.stroke.org.uk/stroke/life-after/equipment-independent-living", "quote": "Kettle tippers to help pour water without lifting the kettle. Non-slip mats to stop spills while preparing food or eating." },
+    "source_tier": "patient_org",
     "source_status": "verified"
   }
 ]

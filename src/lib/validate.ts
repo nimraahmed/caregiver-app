@@ -20,6 +20,10 @@ export const PARSE_FIELDS = [
   "bathroom_type",
   "caregiver",
   "alone_hours_per_day",
+  "night_toilet",
+  "barefoot_indoors",
+  "cooks_alone",
+  "phone_out_of_reach",
   "open_foot_wound",
   "new_stroke_signs",
 ] as const;
@@ -41,6 +45,10 @@ export const parseOutputSchema = z.object({
       bathroom_type: z.enum(["shower", "bathtub", "both"]).nullable().optional(),
       caregiver: z.enum(["family", "live_in_helper", "both", "none"]).nullable().optional(),
       alone_hours_per_day: z.enum(["0", "1-4", "5+"]).nullable().optional(),
+      night_toilet: tri,
+      barefoot_indoors: tri,
+      cooks_alone: tri,
+      phone_out_of_reach: tri,
       open_foot_wound: tri,
       new_stroke_signs: tri,
     })

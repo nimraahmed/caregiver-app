@@ -15,6 +15,10 @@ export const PROFILE_FIELDS: ProfileField[] = [
   "bathroom_type",
   "caregiver",
   "alone_hours_per_day",
+  "night_toilet",
+  "barefoot_indoors",
+  "cooks_alone",
+  "phone_out_of_reach",
   "open_foot_wound",
   "new_stroke_signs",
   "free_text",
@@ -30,7 +34,7 @@ export const conditionSchema = z.union([
 ]);
 
 export const cardSchema = z.object({
-  id: z.string().regex(/^(DM|ST|X)-[A-Z]+-\d{2}$/),
+  id: z.string().regex(/^(DM|ST|X|G)-[A-Z]+-\d{2}$/),
   conditions: z.array(z.enum(["t2dm", "stroke"])).min(1),
   triggers: z.array(conditionSchema).optional(),
   reassign_if: z.array(z.array(conditionSchema).min(1)).optional(),
@@ -78,6 +82,10 @@ export const profileSchema: z.ZodType<Profile> = z.object({
   bathroom_type: z.enum(["shower", "bathtub", "both"]),
   caregiver: z.enum(["family", "live_in_helper", "both", "none"]),
   alone_hours_per_day: z.enum(["0", "1-4", "5+"]),
+  night_toilet: z.boolean(),
+  barefoot_indoors: z.boolean(),
+  cooks_alone: z.boolean(),
+  phone_out_of_reach: z.boolean(),
   open_foot_wound: z.boolean(),
   new_stroke_signs: z.boolean(),
   free_text: z.string().max(500),
@@ -95,7 +103,7 @@ export function validateCards(raw: unknown): Card[] {
     if (ids.has(c.id)) errors.push(`${c.id}: duplicate id`);
     ids.add(c.id);
     const prefix = c.id.split("-")[0];
-    if (prefix === "X" && c.conditions.length !== 2) errors.push(`${c.id}: X- cards must list both conditions`);
+    if ((prefix === "X" || prefix === "G") && c.conditions.length !== 2) errors.push(`${c.id}: ${prefix}- cards must list both conditions`);
     if (prefix === "DM" && (c.conditions.length !== 1 || c.conditions[0] !== "t2dm")) errors.push(`${c.id}: DM- cards must list only t2dm`);
     if (prefix === "ST" && (c.conditions.length !== 1 || c.conditions[0] !== "stroke")) errors.push(`${c.id}: ST- cards must list only stroke`);
     if (c.reassign_if && !c.reassign_reason) errors.push(`${c.id}: reassign_if without reassign_reason`);

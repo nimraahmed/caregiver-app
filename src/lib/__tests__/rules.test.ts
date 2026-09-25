@@ -12,10 +12,10 @@ describe("T1 demo persona", () => {
   const shown = out.map((c) => c.id);
 
   it("shows the expected cards", () => {
-    for (const id of ["DM-FOOT-01", "DM-FOOT-03", "DM-FOOT-04", "DM-FOOT-05", "DM-FOOT-07", "ST-BATH-01", "ST-BATH-02", "ST-BATH-03", "ST-LIV-02", "ST-BED-01", "ST-ROUT-01", "X-FOOT-01", "X-LIV-01"]) {
+    for (const id of ["DM-FOOT-01", "DM-FOOT-03", "DM-FOOT-04", "DM-FOOT-05", "DM-FOOT-07", "ST-BATH-01", "ST-BATH-02", "ST-BATH-03", "ST-LIV-02", "ST-BED-01", "ST-ROUT-01", "X-FOOT-01", "X-LIV-01", "G-BATH-01"]) {
       expect(shown).toContain(id);
     }
-    expect(shown).toHaveLength(13);
+    expect(shown).toHaveLength(14);
   });
 
   it("hides superseded and untriggered cards", () => {
@@ -59,8 +59,8 @@ describe("T2 diabetes only, numb + vision + stairs", () => {
 
 describe("T3 stroke only, right weak, grip, needs help walking", () => {
   const p = profile({ conditions: ["stroke"], weak_side: "right", grip_difficulty: true, walks: "with_help" });
-  it("shows all ST cards, no DM/X", () => {
-    expect(ids(p).sort()).toEqual(["ST-BATH-01", "ST-BATH-02", "ST-BATH-03", "ST-BED-01", "ST-DRESS-01", "ST-LIV-01", "ST-LIV-02", "ST-MOVE-01", "ST-ROUT-01"]);
+  it("shows all ST cards plus the general bath mat, no DM/X", () => {
+    expect(ids(p).sort()).toEqual(["G-BATH-01", "ST-BATH-01", "ST-BATH-02", "ST-BATH-03", "ST-BED-01", "ST-DRESS-01", "ST-LIV-01", "ST-LIV-02", "ST-MOVE-01", "ST-ROUT-01"]);
   });
   it("bathroom cards this_week; living cards stay this_month", () => {
     expect(byId(p, "ST-BATH-01")!.urgency).toBe("this_week");
@@ -153,5 +153,33 @@ describe("soft notice", () => {
     expect(softNotice(profile({ caregiver: "none", walks: "with_aid" }))).toMatch(/personal alarm/);
     expect(softNotice(profile({ caregiver: "none", walks: "independently" }))).toBeNull();
     expect(softNotice(profile({ caregiver: "family", walks: "with_help" }))).toBeNull();
+  });
+});
+
+describe("G- general home-safety cards", () => {
+  it("apply to either condition on their own", () => {
+    expect(ids(profile({ conditions: ["t2dm"], night_toilet: true, vision_reduced: false }))).toContain("G-NIGHT-01");
+    expect(ids(profile({ conditions: ["stroke"], night_toilet: true }))).toContain("G-NIGHT-01");
+  });
+  it("stay hidden when the daily-life answer is not ticked", () => {
+    const shown = ids(profile({ conditions: ["stroke"] }));
+    for (const id of ["G-NIGHT-01", "G-FOOT-01", "G-ALARM-01", "G-BATH-01", "ST-KIT-01"]) expect(shown).not.toContain(id);
+  });
+  it("are superseded by the condition-specific card when both fire", () => {
+    const shown = ids(profile({ conditions: ["t2dm"], night_toilet: true, vision_reduced: true, barefoot_indoors: true, foot_numbness: true }));
+    expect(shown).toContain("DM-VIS-01");
+    expect(shown).not.toContain("G-NIGHT-01");
+    expect(shown).toContain("DM-FOOT-01");
+    expect(shown).not.toContain("G-FOOT-01");
+  });
+  it("phone/alarm card needs time alone; bath mat needs a walking impairment", () => {
+    expect(ids(profile({ phone_out_of_reach: true, alone_hours_per_day: "0" }))).not.toContain("G-ALARM-01");
+    expect(ids(profile({ phone_out_of_reach: true, alone_hours_per_day: "5+" }))).toContain("G-ALARM-01");
+    expect(ids(profile({ walks: "independently" }))).not.toContain("G-BATH-01");
+    expect(ids(profile({ walks: "with_aid" }))).toContain("G-BATH-01");
+  });
+  it("one-handed kitchen card is stroke-only", () => {
+    expect(ids(profile({ conditions: ["stroke"], cooks_alone: true }))).toContain("ST-KIT-01");
+    expect(ids(profile({ conditions: ["t2dm"], cooks_alone: true }))).not.toContain("ST-KIT-01");
   });
 });

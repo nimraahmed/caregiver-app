@@ -83,7 +83,7 @@ export function IntakeFlow() {
       <h1 className="text-2xl font-semibold leading-snug">{question.title}</h1>
       {question.hint && <p className="mt-2 text-stone-600">{question.hint}</p>}
       <div className="mt-6">
-        <QuestionBody id={question.id} profile={profile} evidence={state.evidence} answered={state.answered} onChange={(patch) => setProfile(patch, question.id)} />
+        <QuestionBody id={question.id} profile={profile} evidence={state.evidence} answered={state.answered} patientName={state.patientName} onNameChange={(name) => update((s) => ({ ...s, patientName: name }))} onChange={(patch) => setProfile(patch, question.id)} />
       </div>
     </Shell>
   );

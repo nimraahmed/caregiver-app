@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Shell } from "@/components/ui";
 import { useAppState } from "@/lib/store";
-import { LABELS, type QuestionId } from "@/lib/questions";
+import { LABELS, dailyTrue, type QuestionId } from "@/lib/questions";
 import type { Profile } from "@/lib/types";
 import { QUESTION_FOR } from "@/lib/parseClient";
 import { ContextChips } from "@/components/ContextChips";
@@ -32,6 +32,7 @@ function rows(p: Profile): { q: QuestionId; label: string; value: string }[] {
   if (stroke) out.push({ q: "stroke_issues", label: "Other difficulties", value: issues.length ? issues.join(", ") : "None" });
   out.push(
     { q: "home", label: "Home", value: `${LABELS.home_type[p.home_type]}, ${p.stairs_used_daily ? "stairs daily" : "no stairs"}, ${LABELS.bathroom_type[p.bathroom_type].toLowerCase()}` },
+    { q: "daily", label: "Normal day", value: dailyTrue(p).join(", ") || "None of the listed" },
     { q: "help", label: "Help", value: `${LABELS.caregiver[p.caregiver]}; alone ${LABELS.alone_hours_per_day[p.alone_hours_per_day].toLowerCase()}` },
     { q: "red_flags", label: "Right now", value: flags.length ? flags.join(", ") : "Nothing urgent" },
   );

@@ -17,6 +17,10 @@ Return ONLY JSON matching this shape:
     "bathroom_type": "shower" | "bathtub" | "both" | null,
     "caregiver": "family" | "live_in_helper" | "both" | "none" | null,
     "alone_hours_per_day": "0" | "1-4" | "5+" | null,
+    "night_toilet": true | false | null,
+    "barefoot_indoors": true | false | null,
+    "cooks_alone": true | false | null,
+    "phone_out_of_reach": true | false | null,
     "open_foot_wound": true | false | null,
     "new_stroke_signs": true | false | null
   },
@@ -29,7 +33,9 @@ PART A — typed fields. Use null when the text does not say. Map lay terms to t
 are not mentioned. "with_aid" means a stick, frame or walker; "with_help" means another person.
 A live-in maid, nanny or helper is "live_in_helper"; family plus helper is "both". If the bedroom,
 bathroom or living area they use is on another floor ("bedroom upstairs"), set "stairs_used_daily" true
-and quote that phrase; a villa alone does not imply stairs. If the text mentions
+and quote that phrase; a villa alone does not imply stairs. "night_toilet" is true if they get up at
+night for the toilet; "barefoot_indoors" if they walk around barefoot or in socks; "cooks_alone" if
+they make their own drinks or meals; "phone_out_of_reach" if they cannot reach a phone or alarm. If the text mentions
 an open wound, sore or blister on the foot, or sudden new face drooping, arm weakness or slurred speech,
 set the matching red-flag field to true. For every non-null field give a short quote from the text as evidence.
 

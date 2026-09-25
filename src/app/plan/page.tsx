@@ -51,6 +51,7 @@ export default function PlanPage() {
     ? [p.conditions.includes("t2dm") && p.foot_numbness === null && "feeling in their feet", p.vision_reduced === null && "their eyesight"].filter((s): s is string => Boolean(s))
     : [];
   const planShown = hydrated && !gated && p.conditions.length > 0;
+  const who = state.patientName.trim() || "your family member";
 
   useEffect(() => {
     if (planShown) update((s) => (s.planCreatedAt ? s : { ...s, planCreatedAt: new Date().toISOString() }));
@@ -136,7 +137,7 @@ export default function PlanPage() {
           <p className="mt-2 text-sm text-stone-500 print:hidden">AI assistant unavailable — showing the standard plan.</p>
         ) : null}
         <p className="mt-2 text-sm text-stone-600">
-          Based on your answers. Every item shows its source.{" "}
+          Based on your answers. Every item shows its source and who does it: {who}, the family or the helper.{" "}
           <Link href="/confirm" className="inline-flex min-h-12 items-center px-1 text-teal-800 underline print:hidden">Edit answers</Link>
         </p>
         {p.context && (
@@ -189,7 +190,7 @@ export default function PlanPage() {
           <div key={room} className="mt-5">
             <h3 className="mb-2 text-lg font-semibold">{ROOM_LABEL[room]}</h3>
             <ul className="space-y-3">
-              {cards.map((c) => <PlanCard key={c.id} card={c} caregiver={p.caregiver} hidden={isHidden(c)} onReveal={() => reveal(c.id)} />)}
+              {cards.map((c) => <PlanCard key={c.id} card={c} caregiver={p.caregiver} patientName={state.patientName} hidden={isHidden(c)} onReveal={() => reveal(c.id)} />)}
             </ul>
           </div>
         ))}
@@ -201,10 +202,10 @@ export default function PlanPage() {
         {groupBy(routine, (c) => c.owner, ["caregiver", "patient"] as const).map(([owner, cards]) => (
           <div key={owner} className="mt-5">
             <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold">
-              {owner === "caregiver" ? (p.caregiver === "none" ? "Needs a helper" : "For you") : "For your family member"}
+              {owner === "caregiver" ? (p.caregiver === "none" ? "Needs a helper" : "Done by the caregiver") : `Done by ${who}`}
             </h3>
             <ul className="space-y-3">
-              {cards.map((c) => <PlanCard key={c.id} card={c} caregiver={p.caregiver} hidden={isHidden(c)} onReveal={() => reveal(c.id)} />)}
+              {cards.map((c) => <PlanCard key={c.id} card={c} caregiver={p.caregiver} patientName={state.patientName} hidden={isHidden(c)} onReveal={() => reveal(c.id)} />)}
             </ul>
           </div>
         ))}

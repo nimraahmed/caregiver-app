@@ -1,7 +1,7 @@
 "use client";
 
 import { Choice } from "@/components/ui";
-import { FREE_TEXT_EXAMPLES, LABELS, type QuestionId } from "@/lib/questions";
+import { DAILY_FIELDS, DAILY_LABELS, FREE_TEXT_EXAMPLES, LABELS, type QuestionId } from "@/lib/questions";
 import type { ConditionId, Profile, Tri } from "@/lib/types";
 
 interface Props {
@@ -9,6 +9,8 @@ interface Props {
   profile: Profile;
   evidence: Record<string, string>;
   answered: string[];
+  patientName: string;
+  onNameChange: (name: string) => void;
   onChange: (patch: Partial<Profile>) => void;
 }
 
@@ -57,7 +59,7 @@ function Group<T extends string>({
   );
 }
 
-export function QuestionBody({ id, profile: p, evidence, answered, onChange }: Props) {
+export function QuestionBody({ id, profile: p, evidence, answered, patientName, onNameChange, onChange }: Props) {
   switch (id) {
     case "conditions": {
       const toggle = (c: ConditionId) => {
@@ -75,6 +77,18 @@ export function QuestionBody({ id, profile: p, evidence, answered, onChange }: P
             <Choice key={c} multi label={LABELS.conditions[c]} selected={p.conditions.includes(c)} onClick={() => toggle(c)} />
           ))}
           <Evidence quote={evidence.conditions} />
+          <label className="mt-6 block">
+            <span className="mb-2 block text-sm font-medium text-stone-600">What do you call them? (optional)</span>
+            <input
+              type="text"
+              value={patientName}
+              maxLength={30}
+              onChange={(e) => onNameChange(e.target.value)}
+              placeholder="e.g. Mum, Baba, Ahmed"
+              className="w-full rounded-xl border border-stone-300 bg-white p-4 text-base focus:border-teal-700 focus:outline-none"
+            />
+            <span className="mt-1 block text-xs text-stone-500">Used only to label the plan on this device.</span>
+          </label>
         </div>
       );
     }
@@ -164,6 +178,17 @@ export function QuestionBody({ id, profile: p, evidence, answered, onChange }: P
           </fieldset>
         </div>
       );
+    case "daily": {
+      const none = DAILY_FIELDS.every((f) => !p[f]);
+      return (
+        <div className="space-y-3">
+          {DAILY_FIELDS.map((f) => (
+            <Choice key={f} multi label={DAILY_LABELS[f]} selected={p[f]} onClick={() => onChange({ [f]: !p[f] })} />
+          ))}
+          <Choice label="None of these" selected={none} onClick={() => onChange(Object.fromEntries(DAILY_FIELDS.map((f) => [f, false])))} />
+        </div>
+      );
+    }
     case "help":
       return (
         <div className="space-y-6">

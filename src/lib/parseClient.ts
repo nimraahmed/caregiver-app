@@ -71,6 +71,10 @@ const QUESTION_FOR: Record<keyof ParseResult["fields"], string> = {
   bathroom_type: "home",
   caregiver: "help",
   alone_hours_per_day: "help",
+  night_toilet: "daily",
+  barefoot_indoors: "daily",
+  cooks_alone: "daily",
+  phone_out_of_reach: "daily",
   open_foot_wound: "red_flags",
   new_stroke_signs: "red_flags",
 };

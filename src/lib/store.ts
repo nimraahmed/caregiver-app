@@ -19,6 +19,10 @@ export const EMPTY_PROFILE: Profile = {
   bathroom_type: "shower",
   caregiver: "family",
   alone_hours_per_day: "0",
+  night_toilet: false,
+  barefoot_indoors: false,
+  cooks_alone: false,
+  phone_out_of_reach: false,
   open_foot_wound: false,
   new_stroke_signs: false,
   free_text: "",
@@ -27,6 +31,8 @@ export const EMPTY_PROFILE: Profile = {
 
 export interface AppState {
   profile: Profile;
+  /** First name of the person being cared for; UI labels only, never sent to the model. */
+  patientName: string;
   /** Questions the user has explicitly answered (by question id). */
   answered: string[];
   strokeFlagAcknowledged: boolean;
@@ -46,6 +52,7 @@ export interface AppState {
 const KEY = "hac-state-v1";
 const INITIAL: AppState = {
   profile: EMPTY_PROFILE,
+  patientName: "",
   answered: [],
   strokeFlagAcknowledged: false,
   evidence: {},

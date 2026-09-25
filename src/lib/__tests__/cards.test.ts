@@ -5,7 +5,7 @@ import { validateCards } from "../schema";
 describe("T11 cards.json", () => {
   it("passes schema and referential checks", () => {
     const cards = validateCards(raw);
-    expect(cards).toHaveLength(23);
+    expect(cards).toHaveLength(28);
     expect(cards.every((c) => c.source.title && c.source_tier)).toBe(true);
     expect(cards.filter((c) => c.source_status === "needs_source")).toEqual([]);
     expect(cards.every((c) => c.source.url && c.source.quote)).toBe(true);
