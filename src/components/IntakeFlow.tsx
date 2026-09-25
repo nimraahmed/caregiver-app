@@ -56,7 +56,7 @@ export function IntakeFlow() {
     else go(index - 1);
   };
 
-  const canContinue = isAnswered(question.id, profile);
+  const canContinue = isAnswered(question.id, profile, state.answered);
 
   return (
     <Shell
@@ -83,7 +83,7 @@ export function IntakeFlow() {
       <h1 className="text-2xl font-semibold leading-snug">{question.title}</h1>
       {question.hint && <p className="mt-2 text-stone-600">{question.hint}</p>}
       <div className="mt-6">
-        <QuestionBody id={question.id} profile={profile} evidence={state.evidence} onChange={(patch) => setProfile(patch, question.id)} />
+        <QuestionBody id={question.id} profile={profile} evidence={state.evidence} answered={state.answered} onChange={(patch) => setProfile(patch, question.id)} />
       </div>
     </Shell>
   );

@@ -47,6 +47,9 @@ export default function PlanPage() {
   const routine = selected.filter((c) => c.kind === "daily_routine");
   const reveal = (id: string) => update((s) => ({ ...s, revealed: s.revealed.includes(id) ? s.revealed : [...s.revealed, id] }));
   const notice = softNotice(p);
+  const unsureFields = selected.some((c) => c.unsure_note)
+    ? [p.conditions.includes("t2dm") && p.foot_numbness === null && "feeling in their feet", p.vision_reduced === null && "their eyesight"].filter((s): s is string => Boolean(s))
+    : [];
   const planShown = hydrated && !gated && p.conditions.length > 0;
 
   useEffect(() => {
@@ -155,6 +158,12 @@ export default function PlanPage() {
         <div className="mt-5 flex gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
           <AlertTriangle className="mt-0.5 shrink-0" size={20} />
           <p className="text-sm font-medium">{FOOT_WOUND_FLAG.body}</p>
+        </div>
+      )}
+      {unsureFields.length > 0 && (
+        <div className="mt-4 rounded-xl border border-stone-200 bg-stone-100 p-4 text-sm text-stone-700">
+          You weren&rsquo;t sure about {unsureFields.join(" and ")}, so the related items are included to be safe. If their doctor or nurse says it&rsquo;s not a problem, you can{" "}
+          <Link href="/intake" className="underline">change your answer</Link>.
         </div>
       )}
       {notice && <div className="mt-4 rounded-xl border border-stone-200 bg-stone-100 p-4 text-sm text-stone-700">{notice}</div>}

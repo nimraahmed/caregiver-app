@@ -87,7 +87,7 @@ export function PlanCard({ card, caregiver, hidden, onReveal }: { card: Tailored
         <p className="mt-2 text-sm text-amber-900">Ask a family member, neighbour or community nurse to help with this.</p>
       )}
       {card.urgency_bumped_reason && <p className="mt-2 text-sm text-stone-600">{card.urgency_bumped_reason}.</p>}
-      {card.unsure_note && <p className="mt-2 text-sm text-stone-500">Shown because you weren&rsquo;t sure — safer to include it.</p>}
+      {card.unsure_note && <p className="mt-2 text-xs text-stone-500">Precaution</p>}
 
       <div className="mt-3 border-t border-stone-100 pt-2">
         <button

@@ -8,11 +8,16 @@ interface Props {
   id: QuestionId;
   profile: Profile;
   evidence: Record<string, string>;
+  answered: string[];
   onChange: (patch: Partial<Profile>) => void;
 }
 
-export function isAnswered(id: QuestionId, p: Profile): boolean {
+/** Tri-state questions where null means "Not sure" — it must be chosen, not skipped. */
+const TRI_QUESTIONS = ["foot_numbness", "vision_reduced"] as const;
+
+export function isAnswered(id: QuestionId, p: Profile, answered: string[]): boolean {
   if (id === "conditions") return p.conditions.length > 0;
+  if (id === TRI_QUESTIONS[0] || id === TRI_QUESTIONS[1]) return p[id] !== null || answered.includes(id);
   return true;
 }
 
@@ -21,12 +26,12 @@ function Evidence({ quote }: { quote?: string }) {
   return <p className="mt-3 text-sm text-teal-800">From your description: &ldquo;{quote}&rdquo;</p>;
 }
 
-function TriChoice({ value, onChange }: { value: Tri; onChange: (v: Tri) => void }) {
+function TriChoice({ value, chosen, onChange }: { value: Tri; chosen: boolean; onChange: (v: Tri) => void }) {
   const opts: Tri[] = [true, false, null];
   return (
     <div className="space-y-3">
       {opts.map((o) => (
-        <Choice key={String(o)} label={LABELS.tri[String(o) as "true" | "false" | "null"]} selected={value === o} onClick={() => onChange(o)} />
+        <Choice key={String(o)} label={LABELS.tri[String(o) as "true" | "false" | "null"]} selected={value === o && (o !== null || chosen)} onClick={() => onChange(o)} />
       ))}
     </div>
   );
@@ -52,7 +57,7 @@ function Group<T extends string>({
   );
 }
 
-export function QuestionBody({ id, profile: p, evidence, onChange }: Props) {
+export function QuestionBody({ id, profile: p, evidence, answered, onChange }: Props) {
   switch (id) {
     case "conditions": {
       const toggle = (c: ConditionId) => {
@@ -103,14 +108,14 @@ export function QuestionBody({ id, profile: p, evidence, onChange }: Props) {
     case "foot_numbness":
       return (
         <>
-          <TriChoice value={p.foot_numbness} onChange={(v) => onChange({ foot_numbness: v })} />
+          <TriChoice value={p.foot_numbness} chosen={answered.includes(id)} onChange={(v) => onChange({ foot_numbness: v })} />
           <Evidence quote={evidence.foot_numbness} />
         </>
       );
     case "vision_reduced":
       return (
         <>
-          <TriChoice value={p.vision_reduced} onChange={(v) => onChange({ vision_reduced: v })} />
+          <TriChoice value={p.vision_reduced} chosen={answered.includes(id)} onChange={(v) => onChange({ vision_reduced: v })} />
           <Evidence quote={evidence.vision_reduced} />
         </>
       );
