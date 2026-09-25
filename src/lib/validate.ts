@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isMedicalContext, violatesGeneratedText } from "./guard";
-import { householdContextSchema } from "./schema";
+import { householdContextSchema, profileSchema } from "./schema";
 import { URGENCY_ORDER, type HouseholdContext, type Profile, type SelectedCard, type Urgency } from "./types";
 
 // ---------- /api/parse ----------
@@ -151,6 +151,14 @@ function safeText(value: string | null | undefined, max: number): string | null 
   return t;
 }
 
+/** Wording that accepts or excuses not doing the card. */
+const CONTRADICTION_RE = /\b(continue|carry on|keep on|no need|not (needed|necessary)|don'?t (need|have) to|skip|optional|only (if|when)|instead of|if (he|she|they) (refuses?|prefers?|declines?|insists?))\b/i;
+
+function safeStep(value: string, max: number): string | null {
+  const t = safeText(value, max);
+  return t && !CONTRADICTION_RE.test(t) ? t : null;
+}
+
 /** Plain rules output wrapped as a plan, used when the LLM is unavailable. */
 export function untailoredPlan(selected: SelectedCard[]): TailoredPlan {
   return {
@@ -184,9 +192,10 @@ export function mergePlan(selected: SelectedCard[], out: PlanOutput | null): Tai
     const base = untailoredPlan([c]).cards[0];
     if (!o) return base;
 
-    const action = safeText(o.action, LIMITS.action);
+    // Safety cards keep their source-backed action verbatim; tailoring goes into why/steps/owner note.
+    const action = isProtected(c) ? null : safeStep(o.action ?? "", LIMITS.action);
     const why = safeText(o.why, LIMITS.why);
-    const steps = (o.steps ?? []).map((s) => safeText(s, LIMITS.step)).filter((s): s is string => s !== null).slice(0, LIMITS.steps);
+    const steps = (o.steps ?? []).map((s) => safeStep(s, LIMITS.step)).filter((s): s is string => s !== null).slice(0, LIMITS.steps);
     const ownerNote = c.owner === "caregiver" ? safeText(o.owner_note, LIMITS.note) : null;
 
     let urgency: Urgency = c.urgency;
@@ -232,10 +241,11 @@ export function mergePlan(selected: SelectedCard[], out: PlanOutput | null): Tai
 
 // ---------- /api/chat ----------
 
+/** Cards are identified only; the server recomputes them from the profile so client text never reaches the model as trusted grounding. */
 export const chatRequestSchema = z.object({
-  profile: z.unknown(),
-  context: householdContextSchema.nullable().optional(),
-  cards: z.array(z.object({ id: z.string(), action: z.string(), why: z.string(), steps: z.array(z.string()).optional(), owner: z.string(), urgency: z.string(), room: z.string() })).max(30),
+  profile: profileSchema,
+  card_ids: z.array(z.string().max(20)).max(30),
+  steps: z.record(z.string().max(20), z.array(z.string().max(LIMITS.step)).max(LIMITS.steps)).optional().default({}),
   messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(600) })).min(1).max(12),
 });
 export type ChatRequest = z.infer<typeof chatRequestSchema>;

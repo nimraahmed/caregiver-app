@@ -28,7 +28,7 @@ export function IntakeFlow() {
   const go = (i: number) => router.push(`/intake?q=${questions[i].id}${returnTo ? `&return=${returnTo}` : ""}`);
 
   const next = async () => {
-    if (question.id === "free_text" && profile.free_text.trim() && profile.free_text !== state.parsedText) {
+    if (question.id === "free_text" && profile.free_text !== state.parsedText) {
       setParsing(true);
       try {
         await applyParse(profile.free_text, update);

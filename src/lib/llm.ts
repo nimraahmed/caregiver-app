@@ -133,6 +133,20 @@ export async function streamText(
   );
 }
 
+/** Full text of a streamed completion, so it can be validated before anything reaches the client. */
+export async function completeText(cfg: LlmConfig, messages: ChatMessage[], opts: Parameters<typeof streamText>[2] = {}): Promise<string> {
+  const stream = await streamText(cfg, messages, opts);
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let out = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    out += decoder.decode(value, { stream: true });
+  }
+  return out + decoder.decode();
+}
+
 /** Reasoning models spend the token budget thinking; keep it short for extraction/tailoring. */
 function reasoningOpts(model: string): Record<string, string> {
   return /gpt-oss|qwen3|deepseek-r1/i.test(model) ? { reasoning_effort: "low" } : {};

@@ -1,22 +1,28 @@
 import { NextResponse } from "next/server";
-import { isMedicalQuestion, REFUSAL_TEXT } from "@/lib/guard";
-import { llmConfig, streamText, type ChatMessage } from "@/lib/llm";
+import { CARDS } from "@/lib/cards";
+import { isMedicalQuestion, REFUSAL_TEXT, violatesGeneratedText } from "@/lib/guard";
+import { completeText, llmConfig, type ChatMessage } from "@/lib/llm";
 import { CHAT_SYSTEM } from "@/lib/prompts";
+import { allowRequest, rateLimited } from "@/lib/ratelimit";
+import { selectCards } from "@/lib/rules";
 import { chatRequestSchema, contextIsEmpty, sanitizeContext } from "@/lib/validate";
 
 export const maxDuration = 30;
 
 const MAX_USER_TURNS = 6;
+const UNAVAILABLE = "The assistant is unavailable right now. The plan above still applies.";
+const UNGROUNDED = "I can only help with the home changes in your plan. Please ask their doctor or nurse about anything medical.";
 
 function text(body: string, status = 200) {
-  return new Response(body, { status, headers: { "content-type": "text/plain; charset=utf-8" } });
+  return new Response(body, { status, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
 }
 
 export async function POST(req: Request) {
+  if (!allowRequest(req, "chat", 20)) return rateLimited();
   const body = chatRequestSchema.safeParse(await req.json().catch(() => null));
   if (!body.success) return NextResponse.json({ error: "invalid request" }, { status: 400 });
 
-  const { messages, cards } = body.data;
+  const { messages, profile, card_ids, steps } = body.data;
   const last = messages[messages.length - 1];
   if (last.role !== "user") return NextResponse.json({ error: "last message must be from user" }, { status: 400 });
   if (last.content.length > 300) return text("Please keep your question under 300 characters.");
@@ -28,12 +34,22 @@ export async function POST(req: Request) {
   if (isMedicalQuestion(last.content)) return text(REFUSAL_TEXT);
 
   const cfg = llmConfig();
-  if (!cfg) return text("The assistant is unavailable right now. The plan above still applies.", 503);
+  if (!cfg) return text(UNAVAILABLE, 503);
 
-  const context = sanitizeContext(body.data.context);
+  // Grounding is recomputed from the library; the client only says which selected cards are visible.
+  const visible = new Set(card_ids);
+  const cards = selectCards(profile, CARDS).filter((c) => visible.size === 0 || visible.has(c.id));
+  const context = sanitizeContext(profile.context);
   const grounding = {
     context: contextIsEmpty(context) ? null : context,
-    cards: cards.map((c) => ({ action: c.action, why: c.why, steps: c.steps ?? [], owner: c.owner, urgency: c.urgency, room: c.room })),
+    cards: cards.map((c) => ({
+      action: c.action,
+      why: c.why,
+      steps: (steps[c.id] ?? []).filter((s) => !violatesGeneratedText(s)),
+      owner: c.owner,
+      urgency: c.urgency,
+      room: c.room,
+    })),
   };
 
   const llmMessages: ChatMessage[] = [
@@ -43,9 +59,12 @@ export async function POST(req: Request) {
   ];
 
   try {
-    const stream = await streamText(cfg, llmMessages, { temperature: 0.5, maxTokens: 220, signal: req.signal });
-    return new Response(stream, { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+    const answer = (await completeText(cfg, llmMessages, { temperature: 0.5, maxTokens: 220, signal: req.signal })).trim();
+    if (!answer) return text(UNAVAILABLE, 503);
+    // The whole reply is checked before any of it is shown.
+    if (violatesGeneratedText(answer)) return text(UNGROUNDED);
+    return text(answer);
   } catch {
-    return text("The assistant is unavailable right now. The plan above still applies.", 503);
+    return text(UNAVAILABLE, 503);
   }
 }

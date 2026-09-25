@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { allowRequest, rateLimited } from "@/lib/ratelimit";
 import { z } from "zod";
 import { completeJson, llmConfig } from "@/lib/llm";
 import { PARSE_SYSTEM } from "@/lib/prompts";
@@ -9,6 +10,7 @@ export const maxDuration = 30;
 const requestSchema = z.object({ text: z.string().trim().min(1).max(500) });
 
 export async function POST(req: Request) {
+  if (!allowRequest(req, "parse", 20)) return rateLimited();
   const body = requestSchema.safeParse(await req.json().catch(() => null));
   if (!body.success) return NextResponse.json({ error: "text (1–500 chars) required" }, { status: 400 });
 

@@ -51,8 +51,8 @@ export function AskSheet({ open, onClose, profile, cards }: { open: boolean; onC
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           profile,
-          context: profile.context,
-          cards: cards.map((c) => ({ id: c.id, action: c.action, why: c.why, steps: c.steps, owner: c.owner, urgency: c.urgency, room: c.room })),
+          card_ids: cards.map((c) => c.id),
+          steps: Object.fromEntries(cards.filter((c) => c.steps.length).map((c) => [c.id, c.steps])),
           messages: next,
         }),
       });

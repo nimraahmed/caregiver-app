@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { allowRequest, rateLimited } from "@/lib/ratelimit";
 import { CARDS } from "@/lib/cards";
 import { completeJson, llmConfig } from "@/lib/llm";
 import { PLAN_SYSTEM } from "@/lib/prompts";
@@ -9,6 +10,7 @@ import { contextIsEmpty, mergePlan, planOutputSchema, sanitizeContext, untailore
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  if (!allowRequest(req, "plan", 20)) return rateLimited();
   const body = profileSchema.safeParse(await req.json().catch(() => null));
   if (!body.success) return NextResponse.json({ error: "invalid profile" }, { status: 400 });
 

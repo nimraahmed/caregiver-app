@@ -27,7 +27,9 @@ Return ONLY JSON matching this shape:
 PART A — typed fields. Use null when the text does not say. Map lay terms to the two conditions
 ("sugar", "diabetic" -> t2dm; "stroke", "clot in the brain" -> stroke). Do not infer conditions that
 are not mentioned. "with_aid" means a stick, frame or walker; "with_help" means another person.
-A live-in maid, nanny or helper is "live_in_helper"; family plus helper is "both". If the text mentions
+A live-in maid, nanny or helper is "live_in_helper"; family plus helper is "both". If the bedroom,
+bathroom or living area they use is on another floor ("bedroom upstairs"), set "stairs_used_daily" true
+and quote that phrase; a villa alone does not imply stairs. If the text mentions
 an open wound, sore or blister on the foot, or sudden new face drooping, arm weakness or slurred speech,
 set the matching red-flag field to true. For every non-null field give a short quote from the text as evidence.
 
@@ -57,7 +59,12 @@ For each card:
   one step about how to introduce it (e.g. try it once with the helper present). Never write a
   step or action that accepts the unsafe behaviour continuing.
 - Sides: "weak_side" is the affected side; anything placed "on the stronger side" goes on
-  "stronger_side". Never swap them.
+  "stronger_side". Never swap them. Sides apply only to where objects, rails and supports go —
+  never to body care (feet, nails, dressing), which is done on both sides.
+- Layout and fixtures: use only what the context states. A "shower" household has no bath tub;
+  do not invent rooms, floors, fixtures or furniture that are not mentioned.
+- People and times: someone who leaves at a stated time is not available after it. Tasks after
+  that time go to the family; tasks needing the helper happen before it.
 - "owner_note": if the card is owned by the caregiver and the context names who is around,
   say who should do it and when (max 15 words), else null.
 - "hide_suggested": true only if the context clearly shows the card does not apply
