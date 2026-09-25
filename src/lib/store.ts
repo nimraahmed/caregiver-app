@@ -2,6 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 import type { Profile } from "./types";
+import type { TailoredPlan } from "./validate";
 
 export const EMPTY_PROFILE: Profile = {
   conditions: [],
@@ -28,12 +29,18 @@ export interface AppState {
   /** Questions the user has explicitly answered (by question id). */
   answered: string[];
   strokeFlagAcknowledged: boolean;
-  /** LLM evidence quotes for pre-filled fields (Milestone 3). */
+  /** LLM evidence quotes for pre-filled fields, keyed by profile field. */
   evidence: Record<string, string>;
+  /** The free text that was last sent to /api/parse, so we do not re-parse unchanged text. */
+  parsedText: string;
+  /** Cached /api/plan result for the profile hash it was computed for. */
+  plan: { key: string; plan: TailoredPlan; fallback: boolean } | null;
+  /** Card ids the user chose to reveal after a hide suggestion. */
+  revealed: string[];
 }
 
 const KEY = "hac-state-v1";
-const INITIAL: AppState = { profile: EMPTY_PROFILE, answered: [], strokeFlagAcknowledged: false, evidence: {} };
+const INITIAL: AppState = { profile: EMPTY_PROFILE, answered: [], strokeFlagAcknowledged: false, evidence: {}, parsedText: "", plan: null, revealed: [] };
 
 let cache: AppState | null = null;
 const listeners = new Set<() => void>();

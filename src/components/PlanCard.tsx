@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, ExternalLink, EyeOff, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui";
 import type { Caregiver, SelectedCard } from "@/lib/types";
+import type { TailoredCard } from "@/lib/validate";
 
 export const URGENCY_LABEL = { this_week: "This week", this_month: "This month", when_you_can: "When you can" } as const;
 export const COST_LABEL = { free: "Free", low: "Low cost", medium: "Some cost", high: "Higher cost" } as const;
@@ -20,9 +21,30 @@ export function ownerLabel(card: SelectedCard, caregiver: Caregiver): { text: st
   return { text: "You do this", tone: "teal" };
 }
 
-export function PlanCard({ card, caregiver }: { card: SelectedCard; caregiver: Caregiver }) {
+export function PlanCard({ card, caregiver, hidden, onReveal }: { card: TailoredCard; caregiver: Caregiver; hidden?: boolean; onReveal?: () => void }) {
   const [showSource, setShowSource] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
   const owner = ownerLabel(card, caregiver);
+
+  if (hidden) {
+    return (
+      <li className="rounded-xl border border-dashed border-stone-300 bg-stone-50 p-4 print:hidden">
+        <div className="flex items-start gap-2 text-sm text-stone-600">
+          <EyeOff size={16} className="mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <span className="font-medium text-stone-700">Probably not needed for you:</span> {card.original_action}
+            {card.hide_reason && <span className="block text-stone-500">{card.hide_reason}</span>}
+          </div>
+        </div>
+        <button type="button" onClick={onReveal} className="mt-1 min-h-12 text-sm font-medium text-teal-800 underline">
+          Show anyway
+        </button>
+      </li>
+    );
+  }
+
+  const action = showOriginal ? card.original_action : card.action;
+  const why = showOriginal ? card.original_why : card.why;
 
   return (
     <li className="print-break-inside-avoid rounded-xl border border-stone-200 bg-white p-4">
@@ -30,9 +52,29 @@ export function PlanCard({ card, caregiver }: { card: SelectedCard; caregiver: C
         <Badge tone={card.urgency === "this_week" ? "teal" : "neutral"}>{URGENCY_LABEL[card.urgency]}</Badge>
         <Badge tone={owner.tone}>{owner.text}</Badge>
         <Badge>{COST_LABEL[card.cost]}</Badge>
+        {card.tailored && !showOriginal && (
+          <Badge tone="teal">
+            <span className="inline-flex items-center gap-1"><Sparkles size={12} /> For your home</span>
+          </Badge>
+        )}
       </div>
-      <h3 className="mt-2 text-base font-semibold leading-snug">{card.action}</h3>
-      <p className="mt-1 text-sm text-stone-600">{card.why}</p>
+      <h3 className="mt-2 text-base font-semibold leading-snug">{action}</h3>
+      <p className="mt-1 text-sm text-stone-600">{why}</p>
+
+      {!showOriginal && card.steps.length > 0 && (
+        <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-stone-700">
+          {card.steps.map((s) => <li key={s}>{s}</li>)}
+        </ol>
+      )}
+      {!showOriginal && card.owner_note && (
+        <p className="mt-2 text-sm text-teal-900"><span className="font-medium">Who and when:</span> {card.owner_note}</p>
+      )}
+      {card.urgency_raised_reason && <p className="mt-2 text-sm text-stone-600">Moved up: {card.urgency_raised_reason}.</p>}
+      {card.tailored && (
+        <button type="button" onClick={() => setShowOriginal((s) => !s)} className="mt-1 min-h-12 text-sm text-stone-500 underline print:hidden">
+          {showOriginal ? "Show tailored version" : "Show original card"}
+        </button>
+      )}
 
       {card.reassigned && card.reassigned_reason && (
         <p className="mt-2 text-sm text-teal-900">

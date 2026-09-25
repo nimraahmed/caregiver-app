@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { AlertTriangle, Phone, Printer, Share2 } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, MessageCircle, Phone, Printer, Share2, Sparkles } from "lucide-react";
 import { Badge, Button, Shell } from "@/components/ui";
 import { PlanCard, URGENCY_LABEL } from "@/components/PlanCard";
-import { CARDS } from "@/lib/cards";
+import { AskSheet } from "@/components/AskSheet";
+import { ContextChips } from "@/components/ContextChips";
 import { FOOT_WOUND_FLAG, EMERGENCY_NUMBER, STROKE_FLAG, redFlags } from "@/lib/redflags";
-import { selectCards, softNotice, splitPlan } from "@/lib/rules";
+import { softNotice } from "@/lib/rules";
 import { buildShareText, whatsappUrl } from "@/lib/share";
 import { useAppState } from "@/lib/store";
-import { ROOM_ORDER, URGENCY_ORDER, type Room, type SelectedCard } from "@/lib/types";
+import { usePlan } from "@/lib/usePlan";
+import { ROOM_ORDER, URGENCY_ORDER, type Room } from "@/lib/types";
+import type { TailoredCard } from "@/lib/validate";
 
 const ROOM_LABEL: Record<Room, string> = {
   bathroom: "Bathroom",
@@ -22,8 +25,8 @@ const ROOM_LABEL: Record<Room, string> = {
   routine: "Routine",
 };
 
-function groupBy<K extends string>(items: SelectedCard[], key: (c: SelectedCard) => K, order: readonly K[]): [K, SelectedCard[]][] {
-  const map = new Map<K, SelectedCard[]>();
+function groupBy<K extends string>(items: TailoredCard[], key: (c: TailoredCard) => K, order: readonly K[]): [K, TailoredCard[]][] {
+  const map = new Map<K, TailoredCard[]>();
   for (const c of items) map.set(key(c), [...(map.get(key(c)) ?? []), c]);
   return order.filter((k) => map.has(k)).map((k) => [k, map.get(k)!]);
 }
@@ -31,11 +34,18 @@ function groupBy<K extends string>(items: SelectedCard[], key: (c: SelectedCard)
 export default function PlanPage() {
   const { state, hydrated, update, setProfile } = useAppState();
   const [tab, setTab] = useState<"home" | "routine">("home");
+  const [askOpen, setAskOpen] = useState(false);
   const p = state.profile;
 
-  const selected = useMemo(() => (p.conditions.length ? selectCards(p, CARDS) : []), [p]);
-  const { homeChanges, routine } = splitPlan(selected);
   const flags = redFlags(p);
+  const gated = flags.stroke && !state.strokeFlagAcknowledged;
+  const { plan, loading, aiUnavailable } = usePlan(hydrated && !gated);
+  const selected = plan.cards;
+  const isHidden = (c: TailoredCard) => c.hide_suggested && !state.revealed.includes(c.id);
+  const visible = selected.filter((c) => !isHidden(c));
+  const homeChanges = selected.filter((c) => c.kind === "home_change");
+  const routine = selected.filter((c) => c.kind === "daily_routine");
+  const reveal = (id: string) => update((s) => ({ ...s, revealed: s.revealed.includes(id) ? s.revealed : [...s.revealed, id] }));
   const notice = softNotice(p);
 
   if (!hydrated) return <Shell><div className="h-40" /></Shell>;
@@ -49,7 +59,7 @@ export default function PlanPage() {
     );
   }
 
-  if (flags.stroke && !state.strokeFlagAcknowledged) {
+  if (gated) {
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center bg-red-600 px-6 py-10 text-white">
         <AlertTriangle size={56} />
@@ -80,9 +90,10 @@ export default function PlanPage() {
     );
   }
 
-  const weekCount = selected.filter((c) => c.urgency === "this_week").length;
-  const monthCount = selected.filter((c) => c.urgency === "this_month").length;
-  const shareText = buildShareText(selected);
+  const weekCount = visible.filter((c) => c.urgency === "this_week").length;
+  const monthCount = visible.filter((c) => c.urgency === "this_month").length;
+  const shareText = buildShareText(visible);
+  const chatAvailable = plan.tailored && !aiUnavailable;
 
   return (
     <Shell
@@ -94,6 +105,11 @@ export default function PlanPage() {
           <Button variant="secondary" onClick={() => window.print()} className="flex-1">
             <span className="flex items-center justify-center gap-2"><Printer size={18} /> Print</span>
           </Button>
+          {chatAvailable && (
+            <Button variant="secondary" onClick={() => setAskOpen(true)} className="flex-1">
+              <span className="flex items-center justify-center gap-2"><MessageCircle size={18} /> Ask</span>
+            </Button>
+          )}
         </>
       }
     >
@@ -102,10 +118,24 @@ export default function PlanPage() {
         <h1 className="mt-1 text-2xl font-semibold">
           {weekCount} {weekCount === 1 ? "change" : "changes"} this week, {monthCount} for this month
         </h1>
+        {plan.summary ? (
+          <p className="mt-2 text-base text-stone-800">{plan.summary}</p>
+        ) : loading ? (
+          <p className="mt-2 flex items-center gap-2 text-sm text-teal-800 print:hidden" aria-live="polite">
+            <Sparkles size={16} className="animate-pulse" /> Tailoring this to your home…
+          </p>
+        ) : aiUnavailable ? (
+          <p className="mt-2 text-sm text-stone-500 print:hidden">AI assistant unavailable — showing the standard plan.</p>
+        ) : null}
         <p className="mt-2 text-sm text-stone-600">
           Based on your answers. Every item shows its source.{" "}
           <Link href="/confirm" className="inline-flex min-h-12 items-center px-1 text-teal-800 underline print:hidden">Edit answers</Link>
         </p>
+        {p.context && (
+          <div className="mt-3 print:hidden">
+            <ContextChips context={p.context} />
+          </div>
+        )}
       </header>
 
       {flags.footWound && (
@@ -137,7 +167,7 @@ export default function PlanPage() {
           <div key={room} className="mt-5">
             <h3 className="mb-2 text-lg font-semibold">{ROOM_LABEL[room]}</h3>
             <ul className="space-y-3">
-              {cards.map((c) => <PlanCard key={c.id} card={c} caregiver={p.caregiver} />)}
+              {cards.map((c) => <PlanCard key={c.id} card={c} caregiver={p.caregiver} hidden={isHidden(c)} onReveal={() => reveal(c.id)} />)}
             </ul>
           </div>
         ))}
@@ -152,15 +182,17 @@ export default function PlanPage() {
               {owner === "caregiver" ? (p.caregiver === "none" ? "Needs a helper" : "For you") : "For your family member"}
             </h3>
             <ul className="space-y-3">
-              {cards.map((c) => <PlanCard key={c.id} card={c} caregiver={p.caregiver} />)}
+              {cards.map((c) => <PlanCard key={c.id} card={c} caregiver={p.caregiver} hidden={isHidden(c)} onReveal={() => reveal(c.id)} />)}
             </ul>
           </div>
         ))}
       </section>
 
+      <AskSheet open={askOpen} onClose={() => setAskOpen(false)} profile={p} cards={visible} />
+
       <footer className="mt-10 text-xs text-stone-500">
         <p className="flex flex-wrap gap-2">
-          {URGENCY_ORDER.map((u) => <Badge key={u}>{URGENCY_LABEL[u]}: {selected.filter((c) => c.urgency === u).length}</Badge>)}
+          {URGENCY_ORDER.map((u) => <Badge key={u}>{URGENCY_LABEL[u]}: {visible.filter((c) => c.urgency === u).length}</Badge>)}
         </p>
         <p className="mt-3">
           This plan covers the home and daily routine only. It is not medical advice. For health questions, ask their doctor or nurse; in an emergency call {EMERGENCY_NUMBER}.

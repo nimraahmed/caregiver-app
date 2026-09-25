@@ -208,7 +208,7 @@ Soft notice (not a red flag): if `caregiver = none` and `walks ≠ independently
 
 Server-side only. OpenAI-compatible client configured by `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY`. If `LLM_API_KEY` is unset the routes return `{ fallback: true }` immediately (no crash at build or request time). Timeout 8 s for calls 1–2, streaming for call 3; `export const maxDuration = 30` on all routes. Temperature 0.3 for calls 1–2, 0.5 for chat. Zod-validated; any failure → fallback.
 
-**Model:** default `gpt-4o-mini` with `response_format: json_schema` (strict) derived from the zod schemas — fast (1–3 s), cheap, schema-enforced so validation failures are rare. Open-source alternative: Groq `llama-3.3-70b-versatile` (`LLM_BASE_URL=https://api.groq.com/openai/v1`, `response_format: json_object` + zod validation + one retry). Swapping is env-only. Call 2 is the quality-critical one (tailoring); if gpt-4o-mini tailoring feels generic in rehearsal, upgrade only `LLM_MODEL` for `/api/plan` to `gpt-4o` — the contract is identical.
+**Model:** default Groq `openai/gpt-oss-120b` (OpenAI-compatible; `LLM_MODEL`/`LLM_BASE_URL` swap providers) with `response_format: json_object` derived from the zod schemas — fast (1–3 s), cheap, schema-enforced so validation failures are rare. Open-source alternative: Groq `openai/gpt-oss-120b` (`LLM_BASE_URL=https://api.groq.com/openai/v1`, `response_format: json_object` + zod validation + one retry). Swapping is env-only. Call 2 is the quality-critical one (tailoring); if gpt-4o-mini tailoring feels generic in rehearsal, upgrade only `LLM_MODEL` for `/api/plan` to `gpt-4o` — the contract is identical.
 
 ### Call 1 `/api/parse` — free text → profile fields + household context
 

@@ -6,6 +6,16 @@ import { Button, Shell } from "@/components/ui";
 import { useAppState } from "@/lib/store";
 import { LABELS, type QuestionId } from "@/lib/questions";
 import type { Profile } from "@/lib/types";
+import { QUESTION_FOR } from "@/lib/parseClient";
+import { ContextChips } from "@/components/ContextChips";
+
+function evidenceFor(q: QuestionId, evidence: Record<string, string>): string | null {
+  const quotes = Object.entries(QUESTION_FOR)
+    .filter(([, question]) => question === q)
+    .map(([field]) => evidence[field])
+    .filter((x): x is string => Boolean(x));
+  return quotes.length ? Array.from(new Set(quotes)).join(" … ") : null;
+}
 
 function rows(p: Profile): { q: QuestionId; label: string; value: string }[] {
   const t2dm = p.conditions.includes("t2dm");
@@ -30,7 +40,7 @@ function rows(p: Profile): { q: QuestionId; label: string; value: string }[] {
 
 export default function ConfirmPage() {
   const router = useRouter();
-  const { state, hydrated } = useAppState();
+  const { state, hydrated, update } = useAppState();
   if (!hydrated) return <Shell><div className="h-40" /></Shell>;
   const p = state.profile;
   if (p.conditions.length === 0) {
@@ -59,7 +69,7 @@ export default function ConfirmPage() {
             <div>
               <div className="text-xs uppercase tracking-wide text-stone-500">{r.label}</div>
               <div className="text-base">{r.value}</div>
-              {state.evidence[r.q] && <div className="mt-0.5 text-xs text-teal-800">From your description: &ldquo;{state.evidence[r.q]}&rdquo;</div>}
+              {evidenceFor(r.q, state.evidence) && <div className="mt-0.5 text-xs text-teal-800">From your description: &ldquo;{evidenceFor(r.q, state.evidence)}&rdquo;</div>}
             </div>
             <Link href={`/intake?q=${r.q}&return=confirm`} className="inline-flex min-h-12 shrink-0 items-center rounded-lg px-3 text-sm font-medium text-teal-800 hover:bg-teal-50">
               Edit
@@ -76,6 +86,22 @@ export default function ConfirmPage() {
             </Link>
           </div>
           <p className="mt-1 whitespace-pre-wrap rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700">{p.free_text}</p>
+        </div>
+      )}
+      {p.context && (
+        <div className="mt-6">
+          <div className="text-xs uppercase tracking-wide text-stone-500">What we understood about your home</div>
+          <p className="mb-2 mt-1 text-sm text-stone-600">The plan is tailored to these. Remove anything that&rsquo;s wrong.</p>
+          <ContextChips
+            context={p.context}
+            onRemove={(key, text) =>
+              update((s) => {
+                const ctx = s.profile.context;
+                if (!ctx) return s;
+                return { ...s, plan: null, profile: { ...s.profile, context: { ...ctx, [key]: ctx[key].filter((t) => t !== text) } } };
+              })
+            }
+          />
         </div>
       )}
     </Shell>

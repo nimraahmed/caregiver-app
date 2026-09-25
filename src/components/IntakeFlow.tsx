@@ -2,18 +2,20 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Button, Shell } from "@/components/ui";
 import { QuestionBody, isAnswered } from "@/components/QuestionBody";
 import { useAppState } from "@/lib/store";
 import { visibleQuestions, type QuestionId } from "@/lib/questions";
+import { applyParse } from "@/lib/parseClient";
 
 export function IntakeFlow() {
   const router = useRouter();
   const params = useSearchParams();
-  const { state, hydrated, setProfile } = useAppState();
+  const { state, hydrated, setProfile, update } = useAppState();
   const profile = state.profile;
   const returnTo = params.get("return");
+  const [parsing, setParsing] = useState(false);
 
   const questions = useMemo(() => visibleQuestions(profile), [profile]);
   const requestedId = params.get("q") as QuestionId | null;
@@ -25,7 +27,15 @@ export function IntakeFlow() {
 
   const go = (i: number) => router.push(`/intake?q=${questions[i].id}${returnTo ? `&return=${returnTo}` : ""}`);
 
-  const next = () => {
+  const next = async () => {
+    if (question.id === "free_text" && profile.free_text.trim() && profile.free_text !== state.parsedText) {
+      setParsing(true);
+      try {
+        await applyParse(profile.free_text, update);
+      } finally {
+        setParsing(false);
+      }
+    }
     // Editing from confirm: return there unless a newly relevant question follows that has not been answered.
     if (returnTo === "confirm") {
       const later = questions.slice(index + 1).find((q) => q.showWhen && !state.answered.includes(q.id));
@@ -55,8 +65,8 @@ export function IntakeFlow() {
           <Button variant="secondary" onClick={back} className="w-28">
             <span className="flex items-center justify-center gap-1"><ArrowLeft size={18} /> Back</span>
           </Button>
-          <Button onClick={next} disabled={!canContinue} className="flex-1">
-            {question.id === "free_text" && !profile.free_text.trim() ? "Skip" : index + 1 === questions.length ? "Review answers" : "Next"}
+          <Button onClick={next} disabled={!canContinue || parsing} className="flex-1">
+            {parsing ? "Reading your description…" : question.id === "free_text" && !profile.free_text.trim() ? "Skip" : index + 1 === questions.length ? "Review answers" : "Next"}
           </Button>
         </>
       }
