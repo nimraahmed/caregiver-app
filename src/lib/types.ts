@@ -41,6 +41,10 @@ export interface Profile {
   bathroom_type: "shower" | "bathtub" | "both";
   caregiver: Caregiver;
   alone_hours_per_day: AloneHours;
+  night_toilet: boolean;
+  barefoot_indoors: boolean;
+  cooks_alone: boolean;
+  phone_out_of_reach: boolean;
   open_foot_wound: boolean;
   new_stroke_signs: boolean;
   free_text: string;

@@ -51,7 +51,11 @@ export function selectCards(profile: Profile, cards: Card[]): SelectedCard[] {
   // 1–2. Condition and trigger filters
   const kept: { card: Card; unsure: boolean }[] = [];
   for (const card of cards) {
-    if (!card.conditions.every((c) => profile.conditions.includes(c))) continue;
+    // G- (general home safety) cards apply to any household; every other card needs all its conditions.
+    const conditionsOk = card.id.startsWith("G-")
+      ? card.conditions.some((c) => profile.conditions.includes(c))
+      : card.conditions.every((c) => profile.conditions.includes(c));
+    if (!conditionsOk) continue;
     const m = matchAll(profile, card.triggers);
     if (!m.matched) continue;
     kept.push({ card, unsure: m.unsure });

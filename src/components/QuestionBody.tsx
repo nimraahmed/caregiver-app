@@ -1,18 +1,25 @@
 "use client";
 
 import { Choice } from "@/components/ui";
-import { FREE_TEXT_EXAMPLES, LABELS, type QuestionId } from "@/lib/questions";
+import { DAILY_FIELDS, DAILY_LABELS, FREE_TEXT_EXAMPLES, LABELS, type QuestionId } from "@/lib/questions";
 import type { ConditionId, Profile, Tri } from "@/lib/types";
 
 interface Props {
   id: QuestionId;
   profile: Profile;
   evidence: Record<string, string>;
+  answered: string[];
+  patientName: string;
+  onNameChange: (name: string) => void;
   onChange: (patch: Partial<Profile>) => void;
 }
 
-export function isAnswered(id: QuestionId, p: Profile): boolean {
+/** Tri-state questions where null means "Not sure" — it must be chosen, not skipped. */
+const TRI_QUESTIONS = ["foot_numbness", "vision_reduced"] as const;
+
+export function isAnswered(id: QuestionId, p: Profile, answered: string[]): boolean {
   if (id === "conditions") return p.conditions.length > 0;
+  if (id === TRI_QUESTIONS[0] || id === TRI_QUESTIONS[1]) return p[id] !== null || answered.includes(id);
   return true;
 }
 
@@ -21,12 +28,12 @@ function Evidence({ quote }: { quote?: string }) {
   return <p className="mt-3 text-sm text-teal-800">From your description: &ldquo;{quote}&rdquo;</p>;
 }
 
-function TriChoice({ value, onChange }: { value: Tri; onChange: (v: Tri) => void }) {
+function TriChoice({ value, chosen, onChange }: { value: Tri; chosen: boolean; onChange: (v: Tri) => void }) {
   const opts: Tri[] = [true, false, null];
   return (
     <div className="space-y-3">
       {opts.map((o) => (
-        <Choice key={String(o)} label={LABELS.tri[String(o) as "true" | "false" | "null"]} selected={value === o} onClick={() => onChange(o)} />
+        <Choice key={String(o)} label={LABELS.tri[String(o) as "true" | "false" | "null"]} selected={value === o && (o !== null || chosen)} onClick={() => onChange(o)} />
       ))}
     </div>
   );
@@ -52,7 +59,7 @@ function Group<T extends string>({
   );
 }
 
-export function QuestionBody({ id, profile: p, evidence, onChange }: Props) {
+export function QuestionBody({ id, profile: p, evidence, answered, patientName, onNameChange, onChange }: Props) {
   switch (id) {
     case "conditions": {
       const toggle = (c: ConditionId) => {
@@ -70,6 +77,18 @@ export function QuestionBody({ id, profile: p, evidence, onChange }: Props) {
             <Choice key={c} multi label={LABELS.conditions[c]} selected={p.conditions.includes(c)} onClick={() => toggle(c)} />
           ))}
           <Evidence quote={evidence.conditions} />
+          <label className="mt-6 block">
+            <span className="mb-2 block text-sm font-medium text-stone-600">What do you call them? (optional)</span>
+            <input
+              type="text"
+              value={patientName}
+              maxLength={30}
+              onChange={(e) => onNameChange(e.target.value)}
+              placeholder="e.g. Mum, Baba, Ahmed"
+              className="w-full rounded-xl border border-stone-300 bg-white p-4 text-base focus:border-teal-700 focus:outline-none"
+            />
+            <span className="mt-1 block text-xs text-stone-500">Used only to label the plan on this device.</span>
+          </label>
         </div>
       );
     }
@@ -103,14 +122,14 @@ export function QuestionBody({ id, profile: p, evidence, onChange }: Props) {
     case "foot_numbness":
       return (
         <>
-          <TriChoice value={p.foot_numbness} onChange={(v) => onChange({ foot_numbness: v })} />
+          <TriChoice value={p.foot_numbness} chosen={answered.includes(id)} onChange={(v) => onChange({ foot_numbness: v })} />
           <Evidence quote={evidence.foot_numbness} />
         </>
       );
     case "vision_reduced":
       return (
         <>
-          <TriChoice value={p.vision_reduced} onChange={(v) => onChange({ vision_reduced: v })} />
+          <TriChoice value={p.vision_reduced} chosen={answered.includes(id)} onChange={(v) => onChange({ vision_reduced: v })} />
           <Evidence quote={evidence.vision_reduced} />
         </>
       );
@@ -159,6 +178,17 @@ export function QuestionBody({ id, profile: p, evidence, onChange }: Props) {
           </fieldset>
         </div>
       );
+    case "daily": {
+      const none = DAILY_FIELDS.every((f) => !p[f]);
+      return (
+        <div className="space-y-3">
+          {DAILY_FIELDS.map((f) => (
+            <Choice key={f} multi label={DAILY_LABELS[f]} selected={p[f]} onClick={() => onChange({ [f]: !p[f] })} />
+          ))}
+          <Choice label="None of these" selected={none} onClick={() => onChange(Object.fromEntries(DAILY_FIELDS.map((f) => [f, false])))} />
+        </div>
+      );
+    }
     case "help":
       return (
         <div className="space-y-6">

@@ -9,6 +9,7 @@ export type QuestionId =
   | "walks"
   | "stroke_issues"
   | "home"
+  | "daily"
   | "help"
   | "red_flags";
 
@@ -35,6 +36,7 @@ export const QUESTIONS: Question[] = [
   { id: "walks", title: "How do they get around?" },
   { id: "stroke_issues", title: "Any of these?", hint: "Choose all that apply.", showWhen: hasStroke },
   { id: "home", title: "About the home" },
+  { id: "daily", title: "Which of these are true on a normal day?", hint: "Choose all that apply." },
   { id: "help", title: "Who helps them day to day, and how long are they alone?" },
   { id: "red_flags", title: "Right now, do they have any of these?", hint: "This helps us tell you if something needs urgent attention." },
 ];
@@ -48,6 +50,20 @@ export const FREE_TEXT_EXAMPLES = [
   "Our helper leaves at 6pm and I get home at 8.",
   "She refuses to use her walking stick.",
 ];
+
+export const DAILY_LABELS = {
+  night_toilet: "Gets up at night to use the toilet",
+  barefoot_indoors: "Walks around indoors barefoot or in socks",
+  cooks_alone: "Makes their own hot drinks or meals",
+  phone_out_of_reach: "Often can't reach a phone or alarm",
+} as const;
+
+export type DailyField = keyof typeof DAILY_LABELS;
+export const DAILY_FIELDS = Object.keys(DAILY_LABELS) as DailyField[];
+
+export function dailyTrue(p: Profile): string[] {
+  return DAILY_FIELDS.filter((f) => p[f]).map((f) => DAILY_LABELS[f]);
+}
 
 export const LABELS = {
   conditions: { t2dm: "Type 2 diabetes", stroke: "Stroke" },
